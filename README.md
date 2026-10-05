@@ -627,10 +627,9 @@ const a = b * c + d
   `meriyah` parsers. JavaScript embedded in other languages, like Vue or
   Markdown, goes through the same parsers, and is formatted by Penere too.
   JSON is left to stock Prettier.
-- **Pug:** [`@prettier/plugin-pug`](https://github.com/prettier/plugin-pug)
-  formats expressions in templates without the other plugins, so they are
-  formatted by stock Prettier. Until that's fixed upstream, it can be patched
-  to pass on `plugins`, e.g. with `pnpm patch`.
+- **Pug:** expressions in templates are formatted by Penere with
+  [`@prettier/plugin-pug`](https://github.com/prettier/plugin-pug) 3.6.0 or
+  newer. Older versions format them with stock Prettier.
 - `ternaryWrap` doesn't apply with `experimentalTernaries`.
 
 ## How it works
