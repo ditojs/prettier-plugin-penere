@@ -136,8 +136,9 @@ option.
 
 ### `arrayWrap`
 
-Break if the source breaks after `[`. A break between the first and second
-element puts every element on its own line, otherwise elements are filled.
+Break if the source breaks after `[`, and keep the rows of elements as written,
+e.g. to group them. If the first row has only one element, every element goes
+on its own line.
 
 ```js
 // Input

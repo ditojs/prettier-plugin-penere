@@ -80,3 +80,13 @@ for (const [
 name,
 componentSchema] of Object.entries(components)) {}
 
+
+const rows1 = [
+  1,
+  2, 3, 2,
+]
+
+const rows2 = [
+  1, 2,
+  2, 3, 2,
+]

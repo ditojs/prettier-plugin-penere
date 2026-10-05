@@ -218,8 +218,9 @@ const wrapChoices = [
 // default either, see `getOption()`.
 const wrapOptions = {
   arrayWrap: (
-    'Arrays: break if the source breaks after `[`, and keep line breaks ' +
-    'between elements.'
+    'Arrays: break if the source breaks after `[`, and keep the rows of ' +
+    'elements, or put every element on its own line if the first row has ' +
+    'only one.'
   ),
   parameterWrap: 'Function parameters: break if the source breaks after `(`.',
   conditionWrap: (
