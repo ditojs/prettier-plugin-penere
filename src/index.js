@@ -22,6 +22,11 @@ import {
   isCallLikeExpression,
   printCall
 } from './print/call-expression.js'
+import {
+  isConditionStatement,
+  printConditionStatement
+} from './print/condition.js'
+import { isInterface, printInterface } from './print/interface.js'
 import { printMappedType } from './print/mapped-type.js'
 import { printObjectPattern } from './print/object.js'
 import {
@@ -54,7 +59,14 @@ const estreePrinter = estree.printers.estree
 const parsers = Object.fromEntries(
   [acorn, babel, flow, meriyah, typescript].flatMap(plugin =>
     Object.entries(plugin.parsers)
-      .filter(([, parser]) => parser.astFormat === 'estree')
+      .filter(
+        ([name, parser]) => (
+          parser.astFormat === 'estree' &&
+          // JSON is printed by the estree printer too, but Penere's rules don't
+          // apply to it.
+          !name.startsWith('json')
+        )
+      )
       .map(([name, parser]) => [name, { ...parser, astFormat }])
   )
 )
@@ -90,9 +102,18 @@ function print(path, options, print, args) {
   const isCall = isCallLikeExpression(node)
   const isTemplate = isTemplateLiteral(node)
   const isAssignment = isAssignmentLike(node)
+  const isInterfaceLike = isInterface(node)
+  const isCondition = isConditionStatement(node)
 
   let doc
-  if (isFunction || isCall || isTemplate || isAssignment) {
+  if (
+    isFunction ||
+    isCall ||
+    isTemplate ||
+    isAssignment ||
+    isInterfaceLike ||
+    isCondition
+  ) {
     // Record the docs printed for child nodes, to find parameters and
     // arguments in the doc by identity, and to rebuild interpolations.
     const childDocs = new Set()
@@ -106,8 +127,9 @@ function print(path, options, print, args) {
       (selector, args) => {
         const doc = print(selector, args)
         childDocs.add(doc)
+        // `path.map(print, …)` calls `print(path, index)`.
         const child =
-          selector === undefined
+          selector === undefined || selector === path
             ? path.node
             : typeof selector === 'string'
               ? path.node[selector]
@@ -141,7 +163,11 @@ function print(path, options, print, args) {
         ? printCall(doc, path, options, { argumentDocs, childDocs, nodeDocs })
         : isTemplate
           ? printTemplateLiteral(doc, path, options, nodeDocs)
-          : printAssignment(doc, path, options, nodeDocs)
+          : isInterfaceLike
+            ? printInterface(doc, path, options, nodeDocs)
+            : isCondition
+              ? printConditionStatement(doc, path, options, nodeDocs)
+              : printAssignment(doc, path, options, nodeDocs)
   } else if (
     (node.type === 'BinaryExpression' || node.type === 'LogicalExpression') &&
     isPreserved(options, 'binaryExpressionWrap')
@@ -196,6 +222,10 @@ const wrapOptions = {
     'between elements.'
   ),
   parameterWrap: 'Function parameters: break if the source breaks after `(`.',
+  conditionWrap: (
+    'Conditions of `if`, `while` and `do … while`: break if the source ' +
+    'breaks after `(`.'
+  ),
   argumentWrap: 'Call arguments: break if the source breaks after `(`.',
   memberChainWrap:
     'Member chains: expand if the source breaks before the first call.',
@@ -220,6 +250,10 @@ const wrapOptions = {
     'JSX attributes: break if the source breaks before the first one.',
   typeParameterWrap:
     'Type parameters and arguments: break if the source breaks after `<`.',
+  heritageWrap: (
+    'Interface `extends` clauses: keep a line break before `extends`, and ' +
+    'put each extended type on its own line if the source breaks between them.'
+  ),
   unionTypeWrap:
     'Union types: break if they span multiple lines in the source.',
   mappedTypeWrap: (

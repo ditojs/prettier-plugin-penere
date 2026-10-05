@@ -9,3 +9,12 @@ type Method3 =
   | "post";
 
 function request(method: "get" | "post") {}
+
+type Component<X> =
+  X extends Record<string, any>
+    ?
+        | NonOptionFieldComponent<X>
+        | OptionComponent<X, NonNullable<X>>
+    :
+        | NonSectionComponent<X>
+        | SectionSchema<X>;

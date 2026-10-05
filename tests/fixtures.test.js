@@ -18,6 +18,7 @@ const ported = new Set([
   'binaryish',
   'call-arguments',
   'function-parameters',
+  'heritage',
   'mapped-type',
   'member-chain',
   'object',

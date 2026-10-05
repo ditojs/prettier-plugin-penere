@@ -1,5 +1,7 @@
-import { util } from 'prettier'
+import { doc, util } from 'prettier'
 import { isDocType, isPreserved } from '../utils.js'
+
+const { hardline, indent } = doc.builders
 
 // The group of `| type` parts in `printUnionType()`.
 const isUnionGroup = doc => (
@@ -24,7 +26,17 @@ export function printUnionType(unionDoc, path, options) {
     return unionDoc
   }
   if (isUnionGroup(unionDoc)) {
-    return { ...unionDoc, break: true }
+    const broken = { ...unionDoc, break: true }
+    // Keep a line break after the `?` or `:` of conditional types:
+    //
+    //   X extends Y
+    //     ?
+    //         | A
+    //         | B
+    //     : C
+    return isConditionalBranch(path) && hasNewlineAfterOperator(node, options)
+      ? indent([hardline, broken])
+      : broken
   }
   const indented = isDocType(unionDoc, 'group') ? unionDoc.contents : null
   if (isDocType(indented, 'indent') && isUnionGroup(indented.contents[1])) {
@@ -40,6 +52,39 @@ export function printUnionType(unionDoc, path, options) {
   return unionDoc
 }
 
+const isConditionalBranch = path => (
+  (path.key === 'trueType' || path.key === 'falseType') && (
+    path.parent.type === 'TSConditionalType' ||
+    path.parent.type === 'ConditionalTypeAnnotation'
+  )
+)
+
+// The position of the leading `|`, which may or may not be part of the node,
+// depending on the parser.
+function getLeadingPipe(node, options) {
+  const text = options.originalText
+  const start = options.locStart(node)
+  const pipe =
+    text[start] === '|'
+      ? start
+      : util.skipWhitespace(text, start - 1, { backwards: true })
+  return pipe !== false && text[pipe] === '|' ? pipe : -1
+}
+
+function hasNewlineAfterOperator(node, options) {
+  const text = options.originalText
+  const pipe = getLeadingPipe(node, options)
+  const operator =
+    pipe === -1
+      ? false
+      : util.skipWhitespace(text, pipe - 1, { backwards: true })
+  return (
+    operator !== false &&
+    (text[operator] === '?' || text[operator] === ':') &&
+    util.hasNewlineInRange(text, operator, pipe)
+  )
+}
+
 // Whether the union spans multiple lines in the source, including a line break
 // before its leading `|`:
 //
@@ -47,14 +92,10 @@ export function printUnionType(unionDoc, path, options) {
 //     | 'get' | 'post'
 function spansMultipleLines(node, options) {
   const text = options.originalText
-  let start = options.locStart(node)
-  // The leading `|` may or may not be part of the node, depending on the parser.
-  const pipe =
-    text[start] === '|'
-      ? start
-      : util.skipWhitespace(text, start - 1, { backwards: true })
-  if (pipe !== false && text[pipe] === '|') {
-    start = util.skipWhitespace(text, pipe - 1, { backwards: true }) || 0
-  }
+  const pipe = getLeadingPipe(node, options)
+  const start =
+    pipe === -1
+      ? options.locStart(node)
+      : util.skipWhitespace(text, pipe - 1, { backwards: true }) || 0
   return util.hasNewlineInRange(text, start, options.locEnd(node))
 }

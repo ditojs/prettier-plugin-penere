@@ -509,3 +509,12 @@ if (
 ) {
   // Impl
 }
+
+if (
+  !(
+    wildcard ||
+    property && ['object', 'array'].includes(property.type)
+  )
+) {
+  // Impl
+}

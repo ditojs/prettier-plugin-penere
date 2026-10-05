@@ -35,3 +35,14 @@ test('`*Wrap` options override `wrap`', async () => {
     'const a = [\n  1, 2,\n];\nfoo(a, b);'
   )
 })
+
+test('JSON is formatted by stock Prettier', async () => {
+  const json =
+    '{ "files": [\n  "a", "b"\n], "keys": ["one", "two", "three", "four", "five", "six", "seven", "eight"] }'
+  for (const parser of ['json', 'json5', 'jsonc']) {
+    assert.equal(
+      await prettier.format(json, { parser, plugins: [penere] }),
+      await prettier.format(json, { parser })
+    )
+  }
+})

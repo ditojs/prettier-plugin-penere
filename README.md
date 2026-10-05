@@ -100,6 +100,7 @@ Prettier), like Prettier's own `objectWrap`.
 | `arrayWrap`            | `wrap`       | Arrays and array patterns, tuples                         |
 | `parameterWrap`        | `wrap`       | Function parameters                                       |
 | `argumentWrap`         | `wrap`       | Call arguments                                            |
+| `conditionWrap`        | `wrap`       | Conditions of `if`, `while` and `do … while`              |
 | `memberChainWrap`      | `wrap`       | Member chains                                             |
 | `objectPatternWrap`    | `wrap`       | Destructuring patterns                                    |
 | `ternaryWrap`          | `wrap`       | Conditional expressions and types                         |
@@ -108,6 +109,7 @@ Prettier), like Prettier's own `objectWrap`.
 | `moduleSpecifierWrap`  | `wrap`       | Import and export specifiers                              |
 | `jsxAttributeWrap`     | `wrap`       | JSX attributes                                            |
 | `typeParameterWrap`    | `wrap`       | Type parameters and arguments                             |
+| `heritageWrap`         | `wrap`       | `extends` clauses of interfaces                           |
 | `unionTypeWrap`        | `wrap`       | Union types                                               |
 | `mappedTypeWrap`       | `wrap`       | Keys of mapped types                                      |
 
@@ -196,6 +198,31 @@ test(
 // argumentWrap: "collapse"
 test(foo(), bar())
 ```
+
+### `conditionWrap`
+
+Since Prettier 3.7, conditions like `!(…)` are hugged by `if (`. If the source
+breaks after `(`, Penere breaks there again when the condition breaks.
+
+```js
+// Input, and conditionWrap: "preserve"
+if (
+  !(
+    wildcard ||
+    property && property.type === 'object'
+  )
+) {
+}
+
+// conditionWrap: "collapse"
+if (!(
+  wildcard ||
+  property && property.type === 'object'
+)) {
+}
+```
+
+Written as `if (!(`, the condition stays hugged with both values.
 
 ### `memberChainWrap`
 
@@ -388,10 +415,27 @@ type Pair<
 type Pair<A, B> = [A, B]
 ```
 
+### `heritageWrap`
+
+Keep a line break before the `extends` of interfaces, and put each extended
+type on its own line if the source breaks between them.
+
+```ts
+// Input, and heritageWrap: "preserve"
+interface InputSchema<$Item>
+  extends BaseSchema<$Item>,
+    SchemaTextMixin<$Item> {}
+
+// heritageWrap: "collapse"
+interface InputSchema<$Item>
+  extends BaseSchema<$Item>, SchemaTextMixin<$Item> {}
+```
+
 ### `unionTypeWrap`
 
 Break unions that span multiple lines in the source, including a line break
-before a leading `|`.
+before a leading `|`, which is also kept after the `?` and `:` of conditional
+types.
 
 ```ts
 // Input
@@ -530,6 +574,11 @@ const a = b * c + d
   `babel-flow`, `babel-ts`, `flow`, `typescript`, `acorn`, `espree` and
   `meriyah` parsers. JavaScript embedded in other languages, like Vue or
   Markdown, goes through the same parsers, and is formatted by Penere too.
+  JSON is left to stock Prettier.
+- **Pug:** [`@prettier/plugin-pug`](https://github.com/prettier/plugin-pug)
+  formats expressions in templates without the other plugins, so they are
+  formatted by stock Prettier. Until that's fixed upstream, it can be patched
+  to pass on `plugins`, e.g. with `pnpm patch`.
 - `ternaryWrap` doesn't apply with `experimentalTernaries`.
 
 ## How it works

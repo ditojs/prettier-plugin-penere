@@ -22,3 +22,6 @@ export type SelectModelKeys<T> = Exclude<
   | 'foreignKeyId'
   | `$${string}`
 >
+
+type BeforeHookKey =
+  `${'before' | '*'}:${ModelControllerHookType | '*'}:${ControllerActionName | '*'}`

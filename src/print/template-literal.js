@@ -66,13 +66,15 @@ export function printTemplateLiteral(templateDoc, path, options, nodeDocs) {
       options.locStart(expression)
     )
     const line = shouldBreak ? hardline : softline
-    // Unions print their own line breaks, see `printUnionType()`.
+    // Unions print their own line breaks, see `printUnionType()`. Unless the
+    // source breaks after `${`, print them on one line, like stock Prettier
+    // does with all interpolations that are on one line in the source.
     expressionDoc =
       Array.isArray(expressionDoc) || expression.type !== 'TSUnionType'
         ? [indent([line, expressionDoc]), line]
         : shouldBreak
           ? [{ ...expressionDoc, break: true }, line]
-          : expressionDoc
+          : printFlat(expressionDoc, options)
     expressionDoc =
       indentSize === 0 && text.endsWith('\n')
         ? align(Number.NEGATIVE_INFINITY, expressionDoc)
@@ -84,4 +86,11 @@ export function printTemplateLiteral(templateDoc, path, options, nodeDocs) {
   })
 
   return [templateDoc[0], '`', ...parts, '`']
+}
+
+function printFlat(expressionDoc, options) {
+  return doc.printer.printDocToString(expressionDoc, {
+    ...options,
+    printWidth: Number.POSITIVE_INFINITY
+  }).formatted
 }
