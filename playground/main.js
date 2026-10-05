@@ -15,26 +15,30 @@ import {
 
 const sample = `// Break after an opener and it stays expanded, join it and it collapses.
 const sizes = [
-  1, 2, 3
+  1, 
+  2, 2, 3, 2,
 ]
 
-const isSameShape = (
-  (
-    isPlainObject(before) &&
-    isPlainObject(after)
-  ) || (
-    isArray(before) &&
-    isArray(after) &&
-    before.length === after.length
-  )
-)
+const object = {
+  a: 1, b: 2, c: 3
+}
+
+const isSameShape = 
+  isPlainObject(before) &&
+  isPlainObject(after) || 
+  isArray(before) &&
+  isArray(after) &&
+  before.length === after.length
 
 if (
-  data && !isEmptySchema(schema)) {
+  data && !isEmptySchema(schema)
+) {
   load(data)
 }
 
-async function request(api, { url, method, params, query, headers, data }) {}
+async function request(
+  api, {
+    url, method, params, query, headers, data }) {}
 
 object
   .foo().bar()
