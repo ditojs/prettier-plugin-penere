@@ -1,0 +1,33 @@
+{
+  "name": "prettier-plugin-penere",
+  "version": "0.1.0",
+  "description": "Prettier that respects your line breaks: expressive, controllable formatting on top of stock Prettier",
+  "keywords": [
+    "prettier",
+    "prettier-plugin",
+    "penere",
+    "formatter"
+  ],
+  "license": "MIT",
+  "author": "Jürg Lehni <juerg@scratchdisk.com>",
+  "repository": "ditojs/prettier-plugin-penere",
+  "type": "module",
+  "exports": "./src/index.js",
+  "files": [
+    "src"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test",
+    "format": "prettier --write src tests/*.js",
+    "format:check": "prettier --check src tests/*.js"
+  },
+  "peerDependencies": {
+    "prettier": "~3.9.0"
+  },
+  "devDependencies": {
+    "prettier": "3.9.9"
+  }
+}
