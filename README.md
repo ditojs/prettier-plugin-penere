@@ -6,6 +6,9 @@ bit more expressive, by respecting your line breaks.
 Penere lets you decide how code is laid out, by where you put the first line
 break, and formats everything else the way Prettier does.
 
+Try it in the [playground](https://ditojs.github.io/prettier-plugin-penere/),
+side by side with stock Prettier.
+
 ```js
 // Written on one line, stays on one line (if it fits):
 const sizes = [1, 2, 3]
@@ -646,6 +649,7 @@ printer.
 ```sh
 npm install
 npm test
+npm run playground       # Run the playground locally
 ```
 
 - `tests/fixtures/<name>/input.*` and `output.*` hold the expected Penere
@@ -654,6 +658,8 @@ npm test
 - The same fixtures are formatted with `wrap: "collapse"`, which must match
   stock Prettier exactly.
 - The source is formatted with Penere itself: `npm run format`.
+- The playground in `playground/` is deployed to GitHub Pages on every push to
+  `main`.
 
 ## Badge
 

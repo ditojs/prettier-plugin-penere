@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Penere Playground</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Penere <span>Playground</span></h1>
+      <p class="tagline">Prettier that respects your line breaks.</p>
+      <nav>
+        <span id="versions"></span>
+        <a href="https://github.com/ditojs/prettier-plugin-penere">GitHub</a>
+        <a href="https://www.npmjs.com/package/prettier-plugin-penere">npm</a>
+        <button id="share" type="button">Copy link</button>
+      </nav>
+    </header>
+    <main>
+      <aside id="options">
+        <section>
+          <h2>Prettier</h2>
+          <div id="prettier-options"></div>
+        </section>
+        <section>
+          <h2>Penere</h2>
+          <div id="penere-options"></div>
+        </section>
+        <section>
+          <label class="toggle">
+            <input id="compare" type="checkbox" />
+            Compare with stock Prettier
+          </label>
+          <button id="reset" type="button">Reset options</button>
+        </section>
+      </aside>
+      <div id="panes">
+        <div class="pane">
+          <h2>Input</h2>
+          <div id="input" class="editor"></div>
+        </div>
+        <div class="pane">
+          <h2>Penere</h2>
+          <div id="output" class="editor"></div>
+        </div>
+        <div class="pane" id="stock-pane" hidden>
+          <h2>Stock Prettier</h2>
+          <div id="stock" class="editor"></div>
+        </div>
+      </div>
+    </main>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

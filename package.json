@@ -21,13 +21,21 @@
   },
   "scripts": {
     "test": "node --test",
-    "format": "prettier --write src tests/*.js",
-    "format:check": "prettier --check src tests/*.js"
+    "format": "prettier --write src tests/*.js playground/*.js",
+    "format:check": "prettier --check src tests/*.js playground/*.js",
+    "playground": "vite --config playground/vite.config.js",
+    "playground:build": "vite build --config playground/vite.config.js"
   },
   "peerDependencies": {
     "prettier": "~3.9.0"
   },
   "devDependencies": {
-    "prettier": "3.9.9"
+    "@codemirror/lang-javascript": "^6.2.5",
+    "@codemirror/state": "^6.7.6",
+    "@codemirror/view": "^6.43.13",
+    "codemirror": "^6.0.2",
+    "lz-string": "^1.5.0",
+    "prettier": "3.9.9",
+    "vite": "^8.3.2"
   }
 }
