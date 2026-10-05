@@ -5,6 +5,7 @@ import {
   printComments
 } from '../comments.js'
 import { cleanDoc } from '../doc-utils.js'
+import { isPreserved } from '../utils.js'
 import {
   getPrecedence,
   shouldFlatten as shouldFlattenOperators
@@ -136,7 +137,12 @@ export function printBinaryishExpression(
   )
 
   // PENERE: Collect the breaks of all operands on the same level.
-  const breakLevels = args?.breakLevels ?? {}
+  // PENERE: In conditions, the line break after `(` decides whether the top
+  // level breaks, see `conditionWrap`, like the one after `{` for objects.
+  const breakLevels = (
+    args?.breakLevels ??
+    (isConditionTest(path, options) ? { ignoredLevel: 0 } : {})
+  )
   const level = args?.level ?? 0
   const prerun = args?.prerun ?? false
   const isRoot = args?.level === undefined
@@ -351,6 +357,7 @@ function printBinaryishExpressions(
 
   // PENERE: Break all operands on this level if the source breaks any of them.
   breakLevels[level] ||= (
+    level !== breakLevels.ignoredLevel &&
     isBinaryish(node) &&
     shouldBreakBinaryish(node, options)
   )
@@ -563,6 +570,16 @@ function printBinaryishExpressions(
 
   return parts
 }
+
+// Whether the expression is the condition of an `if`, `while` or `do … while`
+// statement, the breaks of which are handled by `conditionWrap`.
+const isConditionTest = (path, options) => (
+  path.key === 'test' &&
+  ['IfStatement', 'WhileStatement', 'DoWhileStatement'].includes(
+    path.parent.type
+  ) &&
+  isPreserved(options, 'conditionWrap')
+)
 
 // Whether the source breaks between any of the operands of the expression's
 // level, i.e. the expression and its flattened left operands. Unlike

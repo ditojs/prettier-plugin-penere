@@ -1,6 +1,6 @@
 {
   "name": "prettier-plugin-penere",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Prettier that respects your line breaks: expressive, controllable formatting on top of stock Prettier",
   "keywords": [
     "prettier",

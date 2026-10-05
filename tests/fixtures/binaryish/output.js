@@ -588,3 +588,14 @@ while (
 ) {
   // Impl
 }
+
+if (
+  wrapPrimitives &&
+  isArray(value)
+) {
+  // Impl
+}
+
+if (wrapPrimitives && isArray(value)) {
+  // Impl
+}

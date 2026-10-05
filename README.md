@@ -203,7 +203,9 @@ test(foo(), bar())
 
 Break the condition of `if`, `while` and `do … while` statements if the source
 breaks after `(`. Binary and logical conditions then break between their
-operands, while nested groups only break if their source does.
+operands, while nested groups only break if their source does. Like the `{` of
+objects, only the line break after `(` counts: to bring a condition back onto
+one line, remove that one.
 
 ```js
 // Input

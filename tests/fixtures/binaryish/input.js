@@ -554,3 +554,15 @@ while (
   i < n && !done) {
   // Impl
 }
+
+if (
+  wrapPrimitives && isArray(value)
+) {
+  // Impl
+}
+
+if (wrapPrimitives &&
+  isArray(value)
+) {
+  // Impl
+}
