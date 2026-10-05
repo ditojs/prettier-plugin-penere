@@ -1,7 +1,8 @@
 // Whether a `*Wrap` option is set to preserve the line breaks of the source,
 // falling back to the `wrap` option.
 export const isPreserved = (options, name) => (
-  (options[name] ?? options.wrap ?? 'preserve') === 'preserve'
+  (options[name] ?? options.wrap ?? 'preserve') ===
+  'preserve'
 )
 
 // The Penere and stock Prettier values of the other options, used when they
@@ -15,7 +16,8 @@ const defaults = {
 }
 
 export const getOption = (options, name) => (
-  options[name] ?? defaults[name][isPreserved(options, 'wrap') ? 0 : 1]
+  options[name] ??
+  defaults[name][isPreserved(options, 'wrap') ? 0 : 1]
 )
 
 export const isDocType = (doc, type) => doc?.type === type

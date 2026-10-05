@@ -43,27 +43,33 @@ const isBinaryish = node => (
 )
 
 const isCallExpression = node => (
-  node?.type === 'CallExpression' || node?.type === 'OptionalCallExpression'
+  node?.type === 'CallExpression' ||
+  node?.type === 'OptionalCallExpression'
 )
 
 const isCallOrNewExpression = node => (
-  isCallExpression(node) || node?.type === 'NewExpression'
+  isCallExpression(node) ||
+  node?.type === 'NewExpression'
 )
 
 const isCallLikeExpression = node => (
-  isCallOrNewExpression(node) || node?.type === 'ImportExpression'
+  isCallOrNewExpression(node) ||
+  node?.type === 'ImportExpression'
 )
 
 const isMemberExpression = node => (
-  node?.type === 'MemberExpression' || node?.type === 'OptionalMemberExpression'
+  node?.type === 'MemberExpression' ||
+  node?.type === 'OptionalMemberExpression'
 )
 
 const isReturnOrThrowStatement = node => (
-  node?.type === 'ReturnStatement' || node?.type === 'ThrowStatement'
+  node?.type === 'ReturnStatement' ||
+  node?.type === 'ThrowStatement'
 )
 
 const isJsxElement = node => (
-  node?.type === 'JSXElement' || node?.type === 'JSXFragment'
+  node?.type === 'JSXElement' ||
+  node?.type === 'JSXFragment'
 )
 
 const isObjectProperty = node => (
@@ -154,17 +160,29 @@ export function printBinaryishExpression(
     )
   )
 
-  const callPrint = prerun =>
-    printBinaryishExpressions(
+  // PENERE: If an operand has its own parentheses in the source, the line break
+  // after `(` decides whether its level breaks, like the `{` of objects, and
+  // breaks between its operands don't count.
+  const breaksAfterParenthesis = getBreakAfterOwnParenthesis(path, options)
+
+  const callPrint = prerun => {
+    const levelBreaks = isFlattened ? breakLevels : { ...breakLevels }
+    const ownLevel = isFlattened ? level : level + 1
+    if (breaksAfterParenthesis !== undefined) {
+      levelBreaks.ignoredLevel = ownLevel
+      levelBreaks[ownLevel] = breaksAfterParenthesis
+    }
+    return printBinaryishExpressions(
       path,
       options,
       print,
       /* isNested */ false,
       isInsideParenthesis,
-      isFlattened ? breakLevels : { ...breakLevels },
-      isFlattened ? level : level + 1,
+      levelBreaks,
+      ownLevel,
       prerun
     )
+  }
 
   if (isRoot) {
     // Call twice, once to set up all values of `breakLevels`, the second time
@@ -300,7 +318,9 @@ export function printBinaryishExpression(
 
   const firstGroupIndex = parts.findIndex(
     part => (
-      typeof part !== 'string' && !Array.isArray(part) && part.type === 'group'
+      typeof part !== 'string' &&
+      !Array.isArray(part) &&
+      part.type === 'group'
     )
   )
 
@@ -571,6 +591,21 @@ function printBinaryishExpressions(
   return parts
 }
 
+// If an operand of a binaryish expression has parentheses of its own in the
+// source, returns whether the source breaks after the opening one, and
+// `undefined` otherwise. The parentheses that Penere prints around whole
+// expressions, e.g. `= (` and `return (`, don't count.
+function getBreakAfterOwnParenthesis(path, options) {
+  const { node, parent } = path
+  if (!isBinaryish(parent) || !isParenthesized(node, options)) {
+    return undefined
+  }
+  const text = options.originalText
+  const start = options.locStart(node)
+  const opener = util.skipWhitespace(text, start - 1, { backwards: true })
+  return util.hasNewlineInRange(text, opener, start)
+}
+
 // Whether the expression is the condition of an `if`, `while` or `do … while`
 // statement, the breaks of which are handled by `conditionWrap`.
 const isConditionTest = (path, options) => (
@@ -707,7 +742,8 @@ export function shouldInlineLogicalExpression(node, parent, options) {
 }
 
 const isBitwiseOrExpression = node => (
-  node.type === 'BinaryExpression' && node.operator === '|'
+  node.type === 'BinaryExpression' &&
+  node.operator === '|'
 )
 
 function isVueFilterSequenceExpression(path, options) {

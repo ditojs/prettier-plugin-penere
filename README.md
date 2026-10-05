@@ -374,7 +374,9 @@ Operands of mixed `&&` and `||` follow the same rule: they're only wrapped in
 parentheses when they break between their own operands. Operands that stay on
 one line, like `!ctor && !isModule(arg)` below, or only break inside a nested
 group, like `ctor && (`, don't get any. Parentheses you write are kept, see
-`preserveParentheses`.
+`preserveParentheses`. Once an operand has parentheses of its own, the line break
+after its `(` decides whether it breaks, like the `{` of objects: to bring it
+back onto one line, remove that one.
 
 ```js
 // binaryExpressionWrap: "preserve"

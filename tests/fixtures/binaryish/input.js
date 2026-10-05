@@ -566,3 +566,22 @@ if (wrapPrimitives &&
 ) {
   // Impl
 }
+
+const isSameShape1 = (
+  (
+    isPlainObject(before) &&
+    isPlainObject(after)
+  ) || (
+    isArray(before) &&
+    isArray(after)
+  )
+)
+
+const isSameShape2 = (
+  (isPlainObject(before) &&
+    isPlainObject(after)
+  ) || (
+    isArray(before) &&
+    isArray(after)
+  )
+)

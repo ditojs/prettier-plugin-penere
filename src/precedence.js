@@ -25,7 +25,8 @@ const multiplicativeOperators = new Set(['*', '/', '%'])
 const bitshiftOperators = new Set(['>>', '>>>', '<<'])
 
 export const isBitwiseOperator = operator => (
-  bitshiftOperators.has(operator) || ['|', '^', '&'].includes(operator)
+  bitshiftOperators.has(operator) ||
+  ['|', '^', '&'].includes(operator)
 )
 
 // `x * y / z` and `x / y * z`, which stock Prettier doesn't flatten, but adds

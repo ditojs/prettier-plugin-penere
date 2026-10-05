@@ -35,7 +35,8 @@ export const isAssignmentLike = node => (
 )
 
 const isBinaryish = node => (
-  node?.type === 'BinaryExpression' || node?.type === 'LogicalExpression'
+  node?.type === 'BinaryExpression' ||
+  node?.type === 'LogicalExpression'
 )
 
 /*

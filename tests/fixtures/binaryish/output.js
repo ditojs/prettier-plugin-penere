@@ -365,8 +365,10 @@ const conditions2 = (
   (
     hello() &&
     world()
+  ) || (
+    whatever() &&
+    something()
   ) ||
-  (whatever() && something()) ||
   somethingElse()
 );
 
@@ -503,11 +505,8 @@ function ternary3() {
 }
 
 if (
-  splice && (
-    from === undefined ||
-    isArray(from) ||
-    isPlainObject(from)
-  )
+  splice &&
+  (from === undefined || isArray(from) || isPlainObject(from))
 ) {
 }
 
@@ -599,3 +598,20 @@ if (
 if (wrapPrimitives && isArray(value)) {
   // Impl
 }
+
+const isSameShape1 = (
+  (
+    isPlainObject(before) &&
+    isPlainObject(after)
+  ) || (
+    isArray(before) &&
+    isArray(after)
+  )
+);
+
+const isSameShape2 = (
+  (isPlainObject(before) && isPlainObject(after)) || (
+    isArray(before) &&
+    isArray(after)
+  )
+);

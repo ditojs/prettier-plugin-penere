@@ -12,7 +12,8 @@ const {
 } = doc.builders
 
 export const isTemplateLiteral = node => (
-  node?.type === 'TemplateLiteral' || node?.type === 'TSTemplateLiteralType'
+  node?.type === 'TemplateLiteral' ||
+  node?.type === 'TSTemplateLiteralType'
 )
 
 const getExpressions = node =>

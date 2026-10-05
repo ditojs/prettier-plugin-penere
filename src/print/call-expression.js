@@ -17,19 +17,23 @@ export const isCallLikeExpression = node =>
   ].includes(node?.type)
 
 export const isCallArgument = path => (
-  path.key === 'arguments' && isCallLikeExpression(path.parent)
+  path.key === 'arguments' &&
+  isCallLikeExpression(path.parent)
 )
 
 const isMemberExpression = node => (
-  node?.type === 'MemberExpression' || node?.type === 'OptionalMemberExpression'
+  node?.type === 'MemberExpression' ||
+  node?.type === 'OptionalMemberExpression'
 )
 
 const isMemberish = node => (
-  isMemberExpression(node) || (node?.type === 'BindExpression' && !!node.object)
+  isMemberExpression(node) ||
+  (node?.type === 'BindExpression' && !!node.object)
 )
 
 const isCallExpression = node => (
-  node?.type === 'CallExpression' || node?.type === 'OptionalCallExpression'
+  node?.type === 'CallExpression' ||
+  node?.type === 'OptionalCallExpression'
 )
 
 /*

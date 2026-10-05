@@ -88,7 +88,8 @@ function breakTernaryGroup(doc) {
     const [softline, result] = contents[0].contents
     const inner = breakTernaryGroup(result)
     return (
-      inner && {
+      inner &&
+      {
         ...doc,
         contents: [{ ...contents[0], contents: [softline, inner] }, contents[1]]
       }

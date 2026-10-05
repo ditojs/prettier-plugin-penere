@@ -27,7 +27,8 @@ export const isFunctionLike = node => (
 )
 
 export const isFunctionParameter = path => (
-  ['this', 'params', 'rest'].includes(path.key) && isFunctionLike(path.parent)
+  ['this', 'params', 'rest'].includes(path.key) &&
+  isFunctionLike(path.parent)
 )
 
 // Preserve line breaks in function parameters: if the source breaks after the
