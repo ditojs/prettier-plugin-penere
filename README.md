@@ -94,24 +94,24 @@ const formatted = await prettier.format(code, {
 to override it. They take `"preserve"` (Penere) or `"collapse"` (stock
 Prettier), like Prettier's own `objectWrap`.
 
-| Option                 | Default      | Covers                                                    |
-| ---------------------- | ------------ | --------------------------------------------------------- |
-| `wrap`                 | `"preserve"` | All `*Wrap` options that aren't set, and the ones below   |
-| `arrayWrap`            | `wrap`       | Arrays and array patterns, tuples                         |
-| `parameterWrap`        | `wrap`       | Function parameters                                       |
-| `argumentWrap`         | `wrap`       | Call arguments                                            |
-| `conditionWrap`        | `wrap`       | Conditions of `if`, `while` and `do … while`              |
-| `memberChainWrap`      | `wrap`       | Member chains                                             |
-| `objectPatternWrap`    | `wrap`       | Destructuring patterns                                    |
-| `ternaryWrap`          | `wrap`       | Conditional expressions and types                         |
-| `templateLiteralWrap`  | `wrap`       | Template literal interpolations                           |
-| `binaryExpressionWrap` | `wrap`       | Binary and logical expressions, and assignments of them   |
-| `moduleSpecifierWrap`  | `wrap`       | Import and export specifiers                              |
-| `jsxAttributeWrap`     | `wrap`       | JSX attributes                                            |
-| `typeParameterWrap`    | `wrap`       | Type parameters and arguments                             |
-| `heritageWrap`         | `wrap`       | `extends` clauses of interfaces                           |
-| `unionTypeWrap`        | `wrap`       | Union types                                               |
-| `mappedTypeWrap`       | `wrap`       | Keys of mapped types                                      |
+| Option                    | Default      | Covers                                                  |
+| ------------------------- | ------------ | ------------------------------------------------------- |
+| `wrap`                    | `"preserve"` | All `*Wrap` options that aren't set, and the ones below |
+| `arrayWrap`               | `wrap`       | Arrays, array destructuring and tuples                  |
+| `parameterWrap`           | `wrap`       | Function parameters                                     |
+| `argumentWrap`            | `wrap`       | Call arguments                                          |
+| `conditionWrap`           | `wrap`       | Conditions of `if`, `while` and `do … while`            |
+| `memberChainWrap`         | `wrap`       | Member chains                                           |
+| `objectDestructuringWrap` | `wrap`       | Object destructuring                                    |
+| `ternaryWrap`             | `wrap`       | Conditional expressions and types                       |
+| `templateLiteralWrap`     | `wrap`       | Template literal interpolations                         |
+| `operatorWrap`            | `wrap`       | Binary and logical operators, and assignments of them   |
+| `importExportWrap`        | `wrap`       | Named imports and exports                               |
+| `jsxAttributeWrap`        | `wrap`       | JSX attributes                                          |
+| `typeParameterWrap`       | `wrap`       | Type parameters and arguments                           |
+| `extendsWrap`             | `wrap`       | `extends` clauses of interfaces                         |
+| `unionTypeWrap`           | `wrap`       | Union types                                             |
+| `mappedTypeWrap`          | `wrap`       | Keys of mapped types                                    |
 
 The other options are not about line breaks. When they aren't set, they follow
 `wrap` too: Penere's value with `"preserve"`, stock Prettier's with
@@ -119,7 +119,7 @@ The other options are not about line breaks. When they aren't set, they follow
 
 | Option                   | `"preserve"` | `"collapse"` | Covers                                                    |
 | ------------------------ | ------------ | ------------ | --------------------------------------------------------- |
-| `hugLastParameter`       | `true`       | `false`      | Hug the last parameter if it's the only object pattern    |
+| `hugLastParameter`       | `true`       | `false`      | Hug the last parameter if it's the only destructured one  |
 | `conciseStringArrays`    | `true`       | `false`      | Fill arrays of strings like arrays of numbers             |
 | `breakComplexArrayItems` | `false`      | `true`       | Always break arrays of objects or arrays                  |
 | `clarifyMixedOperators`  | `false`      | `true`       | Add parentheses to mixed operators for readability        |
@@ -270,24 +270,24 @@ object.foo().bar()
 expect(value).toBe(true)
 ```
 
-### `objectPatternWrap`
+### `objectDestructuringWrap`
 
-Destructuring patterns follow `objectWrap` like object literals do, and
-patterns in function parameters keep their own group, so that breaking the
-parameters doesn't expand them.
+Object destructuring follows `objectWrap` like object literals do, and
+destructured parameters keep their own group, so that breaking the parameters
+doesn't expand them.
 
 ```js
 // Input
 const {
   a, b } = object
 
-// objectPatternWrap: "preserve"
+// objectDestructuringWrap: "preserve"
 const {
   a,
   b
 } = object
 
-// objectPatternWrap: "collapse"
+// objectDestructuringWrap: "collapse"
 const { a, b } = object
 ```
 
@@ -329,7 +329,7 @@ const message = `${
 const message = `${pico.gray('<--')} ${pico.bold(ctx.method)}`
 ```
 
-### `binaryExpressionWrap`
+### `operatorWrap`
 
 If the source breaks between any two operands, all operands on the same level
 break. Nested expressions that break are wrapped in parentheses, with the
@@ -346,7 +346,7 @@ function isEmpty(arg) {
 const isValid = value => value != null &&
   value !== ''
 
-// binaryExpressionWrap: "preserve"
+// operatorWrap: "preserve"
 function isEmpty(arg) {
   return (
     arg == null ||
@@ -359,7 +359,7 @@ const isValid = value => (
   value !== ''
 )
 
-// binaryExpressionWrap: "collapse"
+// operatorWrap: "collapse"
 function isEmpty(arg) {
   return (
     arg == null ||
@@ -379,7 +379,7 @@ after its `(` decides whether it breaks, like the `{` of objects: to bring it
 back onto one line, remove that one.
 
 ```js
-// binaryExpressionWrap: "preserve"
+// operatorWrap: "preserve"
 function isPlainObject(arg) {
   const ctor = arg?.constructor
   return (
@@ -401,22 +401,22 @@ const isSameShape = (
 )
 ```
 
-### `moduleSpecifierWrap`
+### `importExportWrap`
 
-Break import and export specifiers if the source breaks after `{`.
+Break named imports and exports if the source breaks after `{`.
 
 ```js
 // Input
 import {
   a, b } from 'x'
 
-// moduleSpecifierWrap: "preserve"
+// importExportWrap: "preserve"
 import {
   a,
   b
 } from 'x'
 
-// moduleSpecifierWrap: "collapse"
+// importExportWrap: "collapse"
 import { a, b } from 'x'
 ```
 
@@ -460,18 +460,18 @@ type Pair<
 type Pair<A, B> = [A, B]
 ```
 
-### `heritageWrap`
+### `extendsWrap`
 
 Keep a line break before the `extends` of interfaces, and put each extended
 type on its own line if the source breaks between them.
 
 ```ts
-// Input, and heritageWrap: "preserve"
+// Input, and extendsWrap: "preserve"
 interface InputSchema<$Item>
   extends BaseSchema<$Item>,
     SchemaTextMixin<$Item> {}
 
-// heritageWrap: "collapse"
+// extendsWrap: "collapse"
 interface InputSchema<$Item>
   extends BaseSchema<$Item>, SchemaTextMixin<$Item> {}
 ```
@@ -638,7 +638,8 @@ format, so that Prettier uses Penere's printer, which wraps the built-in one.
 For most rules, Penere lets Prettier print the node, and adjusts the result,
 e.g. by breaking a group or swapping a layout. If the result doesn't have the
 expected shape, it is left untouched, and you get stock Prettier's output.
-Binary expressions are printed by Penere itself, based on Prettier's printer.
+Expressions with operators are printed by Penere itself, based on Prettier's
+printer.
 
 ## Development
 

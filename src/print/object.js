@@ -27,7 +27,7 @@ Adjusts the doc stock Prettier prints for `ObjectPattern`, which is either
 hugged as the only function parameter, or is the left side of an assignment.
 */
 export function printObjectPattern(patternDoc, path, options) {
-  if (!isPreserved(options, 'objectPatternWrap')) {
+  if (!isPreserved(options, 'objectDestructuringWrap')) {
     return patternDoc
   }
   const { node, parent } = path

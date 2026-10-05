@@ -170,7 +170,7 @@ function print(path, options, print, args) {
               : printAssignment(doc, path, options, nodeDocs)
   } else if (
     (node.type === 'BinaryExpression' || node.type === 'LogicalExpression') &&
-    isPreserved(options, 'binaryExpressionWrap')
+    isPreserved(options, 'operatorWrap')
   ) {
     // Stock Prettier is only asked whether it wraps the expression in
     // parentheses, the expression itself is printed by Penere. Children aren't
@@ -229,9 +229,9 @@ const wrapOptions = {
   argumentWrap: 'Call arguments: break if the source breaks after `(`.',
   memberChainWrap:
     'Member chains: expand if the source breaks before the first call.',
-  objectPatternWrap: (
-    'Destructuring patterns: follow `objectWrap`, and keep patterns in ' +
-    'function parameters in their own group.'
+  objectDestructuringWrap: (
+    'Object destructuring: follow `objectWrap`, and keep destructured ' +
+    'parameters in their own group.'
   ),
   ternaryWrap:
     'Conditionals: break if the source breaks before the consequent.',
@@ -239,18 +239,17 @@ const wrapOptions = {
     'Template literal interpolations: allow breaking at `${` and `}`, and ' +
     'keep them broken if the source breaks after `${`.'
   ),
-  binaryExpressionWrap: (
-    'Binary and logical expressions: break all operands on the same level ' +
-    'if the source breaks any of them, and wrap broken nested expressions ' +
-    'in parentheses.'
+  operatorWrap: (
+    'Operators: break all operands on the same level if the source breaks ' +
+    'any of them, and wrap broken nested expressions in parentheses.'
   ),
-  moduleSpecifierWrap:
-    'Import and export specifiers: break if the source breaks after `{`.',
+  importExportWrap:
+    'Named imports and exports: break if the source breaks after `{`.',
   jsxAttributeWrap:
     'JSX attributes: break if the source breaks before the first one.',
   typeParameterWrap:
     'Type parameters and arguments: break if the source breaks after `<`.',
-  heritageWrap: (
+  extendsWrap: (
     'Interface `extends` clauses: keep a line break before `extends`, and ' +
     'put each extended type on its own line if the source breaks between them.'
   ),

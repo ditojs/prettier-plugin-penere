@@ -10,21 +10,21 @@ const fixturesDir = path.join(import.meta.dirname, 'fixtures')
 // Fixtures whose mods are ported. The others are skipped until they are.
 const ported = new Set([
   'array',
-  'jsx-attributes',
-  'module-specifiers',
-  'type-parameters',
-  'union-type',
   'assignment',
   'binaryish',
   'call-arguments',
+  'extends',
   'function-parameters',
-  'heritage',
+  'jsx-attributes',
   'mapped-type',
   'member-chain',
+  'module-specifiers',
   'object',
   'template-literal',
   'template-literal-ts',
-  'ternary'
+  'ternary',
+  'type-parameters',
+  'union-type'
 ])
 
 // `wrap: 'collapse'` turns every Penere behavior off.

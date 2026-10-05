@@ -53,7 +53,7 @@ export function printModuleDeclaration(declarationDoc, path, options) {
     )
   )
   if (
-    !isPreserved(options, 'moduleSpecifierWrap') ||
+    !isPreserved(options, 'importExportWrap') ||
     !specifiers?.length ||
     !hasNewlineAfter(
       options.originalText,

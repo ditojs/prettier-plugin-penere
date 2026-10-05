@@ -28,7 +28,7 @@ export function printInterface(interfaceDoc, path, options, nodeDocs) {
   const types = node.extends ?? []
   const typeDocs = types.map(type => nodeDocs.get(type))
   if (
-    !isPreserved(options, 'heritageWrap') ||
+    !isPreserved(options, 'extendsWrap') ||
     !types.length ||
     typeDocs.some(typeDoc => typeDoc === undefined)
   ) {

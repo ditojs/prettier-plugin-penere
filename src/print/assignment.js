@@ -62,7 +62,7 @@ export function printAssignment(assignmentDoc, path, options, nodeDocs) {
   const rightNode = node[rightPropertyNames[node.type]]
   const rightDoc = nodeDocs.get(rightNode)
   if (
-    !isPreserved(options, 'binaryExpressionWrap') ||
+    !isPreserved(options, 'operatorWrap') ||
     !isBinaryish(rightNode) ||
     rightDoc === undefined
   ) {
@@ -198,7 +198,7 @@ wrapping broken bodies in parentheses:
 export function printArrowFunction(arrowDoc, path, options) {
   const { node } = path
   if (
-    !isPreserved(options, 'binaryExpressionWrap') ||
+    !isPreserved(options, 'operatorWrap') ||
     node.type !== 'ArrowFunctionExpression' ||
     !isBinaryish(node.body)
   ) {
