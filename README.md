@@ -201,15 +201,38 @@ test(foo(), bar())
 
 ### `conditionWrap`
 
-Since Prettier 3.7, conditions like `!(…)` are hugged by `if (`. If the source
-breaks after `(`, Penere breaks there again when the condition breaks.
+Break the condition of `if`, `while` and `do … while` statements if the source
+breaks after `(`. Binary and logical conditions then break between their
+operands, while nested groups only break if their source does.
+
+```js
+// Input
+if (
+  data && !isEmptySchema(schema)) {
+}
+
+// conditionWrap: "preserve"
+if (
+  data &&
+  !isEmptySchema(schema)
+) {
+}
+
+// conditionWrap: "collapse"
+if (data && !isEmptySchema(schema)) {
+}
+```
+
+Since Prettier 3.7, negated conditions are hugged by `if (`. With Penere, that's
+up to you: written as `if (!(`, they stay hugged, and with a break after `if (`,
+they stay broken.
 
 ```js
 // Input, and conditionWrap: "preserve"
 if (
   !(
     wildcard ||
-    property && property.type === 'object'
+    property && ['object', 'array'].includes(property.type)
   )
 ) {
 }
@@ -217,12 +240,10 @@ if (
 // conditionWrap: "collapse"
 if (!(
   wildcard ||
-  property && property.type === 'object'
+  property && ['object', 'array'].includes(property.type)
 )) {
 }
 ```
-
-Written as `if (!(`, the condition stays hugged with both values.
 
 ### `memberChainWrap`
 
@@ -337,8 +358,21 @@ const isValid = value => (
 )
 
 // binaryExpressionWrap: "collapse"
+function isEmpty(arg) {
+  return (
+    arg == null ||
+    isArrayLike(arg) && arg.length === 0 ||
+    isObject(arg) && Object.keys(arg).length === 0
+  )
+}
 const isValid = value => value != null && value !== ''
 ```
+
+Operands of mixed `&&` and `||` follow the same rule: they're only wrapped in
+parentheses when they break between their own operands. Operands that stay on
+one line, like `!ctor && !isModule(arg)` below, or only break inside a nested
+group, like `ctor && (`, don't get any. Parentheses you write are kept, see
+`preserveParentheses`.
 
 ```js
 // binaryExpressionWrap: "preserve"
@@ -354,6 +388,13 @@ function isPlainObject(arg) {
     )
   )
 }
+
+const isSameShape = (
+  isPlainObject(before) && isPlainObject(after) || (
+    isArray(before) &&
+    isArray(after)
+  )
+)
 ```
 
 ### `moduleSpecifierWrap`
@@ -482,6 +523,9 @@ Hug the last parameter if it is an object or array pattern and no other
 parameter is, like Prettier hugs the last argument of a call.
 
 ```js
+// Input
+async function request(api, { url, method, params, query, headers, data, timeout }) {}
+
 // hugLastParameter: true
 async function request(api, {
   url,

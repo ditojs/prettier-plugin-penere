@@ -518,3 +518,39 @@ if (
 ) {
   // Impl
 }
+
+if (data && !isEmptySchema(schema)) {
+  // Impl
+}
+
+if (
+  data && !isEmptySchema(schema)) {
+  // Impl
+}
+
+if (
+  a && (b || c)) {
+  // Impl
+}
+
+if (
+  a && b || c) {
+  // Impl
+}
+
+if (
+  !(a || b)) {
+  // Impl
+}
+
+if (a) {
+  if (
+    b && c) {
+    // Impl
+  }
+}
+
+while (
+  i < n && !done) {
+  // Impl
+}

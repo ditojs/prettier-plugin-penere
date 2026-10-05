@@ -183,6 +183,18 @@ export function printBinaryishExpression(
   //     b &&
   //     c
   //   ).call()
+  // PENERE: Mixed logical operands that break between their own operands are
+  // wrapped in parentheses like other nested binaryish expressions:
+  //
+  //   a || (
+  //     b &&
+  //     c
+  //   )
+  const isBrokenMixedLogical = (
+    isMixedLogical(node, parent) &&
+    isLevelBroken(node, options)
+  )
+
   if (
     (key === 'callee' && isCallOrNewExpression(parent)) ||
     // `UnaryExpression` adds parentheses and indention when argument has comment
@@ -195,7 +207,8 @@ export function printBinaryishExpression(
       isBinaryish(parent) && (
         parent.type !== node.type ||
         isParenthesized(node, options) ||
-        getPrecedence(parent.operator) > getPrecedence(node.operator) || (
+        getPrecedence(parent.operator) > getPrecedence(node.operator) ||
+        isBrokenMixedLogical || (
           node.type === 'BinaryExpression' &&
           getPrecedence(parent.operator) < getPrecedence(node.operator) &&
           shouldBreakBinaryish(node, options) &&
@@ -551,6 +564,48 @@ function printBinaryishExpressions(
   return parts
 }
 
+// Whether the source breaks between any of the operands of the expression's
+// level, i.e. the expression and its flattened left operands. Unlike
+// `shouldBreakBinaryish()`, breaks after the opening parenthesis of a right
+// operand don't count, e.g. in `a && (\n  b || c\n)`.
+function isLevelBroken(node, options) {
+  const text = options.originalText
+  for (let current = node; isBinaryish(current); current = current.left) {
+    const operator = util.getNextNonSpaceNonCommentCharacterIndex(
+      text,
+      options.locEnd(current.left)
+    )
+    const right = util.getNextNonSpaceNonCommentCharacterIndex(
+      text,
+      operator + current.operator.length
+    )
+    if (
+      !isEmptyLiteral(current.right) &&
+      util.hasNewlineInRange(text, options.locEnd(current.left), right)
+    ) {
+      return true
+    }
+    if (
+      !isBinaryish(current.left) ||
+      isParenthesized(current.left, options) ||
+      !shouldFlatten(current.operator, current.left.operator)
+    ) {
+      return false
+    }
+  }
+  return false
+}
+
+// Whether the operand is a logical expression nested in one with a lower
+// precedence, e.g. `a && b` in `a && b || c`, where parentheses are optional.
+// Operands with a lower precedence, e.g. `b || c` in `a && (b || c)`, require
+// parentheses and get them like other nested binaryish expressions.
+const isMixedLogical = (node, parent) => (
+  node?.type === 'LogicalExpression' &&
+  parent?.type === 'LogicalExpression' &&
+  getPrecedence(node.operator) > getPrecedence(parent.operator)
+)
+
 // Whether the doc is a group that breaks between parentheses, as printed above:
 // `group([ifBreak("("), indent([softline, ...]), softline, ifBreak(")")])`, or
 // `["(", group([indent([softline, ...]), softline]), ")"]`.
@@ -625,9 +680,7 @@ export function shouldInlineLogicalExpression(node, parent, options) {
     // PENERE: Inline literals, and also empty objects and arrays.
     isLiteral(right) ||
     right.type === 'ObjectExpression' ||
-    right.type === 'ArrayExpression' ||
-    // PENERE: Inline member expressions on object and array literals.
-    (
+    right.type === 'ArrayExpression' || ( // PENERE: Inline member expressions on object and array literals.
       right.type === 'MemberExpression' &&
       right.property.type === 'Identifier' &&
       ['ObjectExpression', 'ArrayExpression'].includes(right.object.type)

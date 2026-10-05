@@ -18,14 +18,13 @@ as either
 
   group([indent([softline, condition]), softline])
 
-or, since Prettier 3.7, inlined, e.g. `if (!(`. If the source breaks after `(`,
-don't hug the condition, so that it breaks after `(` when its content breaks:
+or, since Prettier 3.7, inlined, e.g. `if (!(`. Like other openers, keep the
+condition broken if the source breaks after `(`, which also breaks binaryish
+conditions between their operands:
 
   if (
-    !(
-      a ||
-      b
-    )
+    a &&
+    !b
   ) {
 */
 export function printConditionStatement(statementDoc, path, options, nodeDocs) {
@@ -58,15 +57,23 @@ export function printConditionStatement(statementDoc, path, options, nodeDocs) {
     if (index === -1 || printed[index + 2] !== ')') {
       return
     }
-    // Only inlined conditions are hugged, grouped ones break with their
-    // content already.
-    if (printed[index + 1] !== conditionDoc) {
+    const condition = printed[index + 1]
+    const isGrouped = (
+      condition?.type === 'group' &&
+      condition.contents?.[0]?.type === 'indent' &&
+      condition.contents[0].contents?.[1] === conditionDoc
+    )
+    if (condition !== conditionDoc && !isGrouped) {
       return
     }
     found = true
     return [
       ...printed.slice(0, index + 1),
-      group([indent([softline, conditionDoc]), softline]),
+      isGrouped
+        ? { ...condition, break: true }
+        : group([indent([softline, conditionDoc]), softline], {
+            shouldBreak: true
+          }),
       ...printed.slice(index + 2)
     ]
   })

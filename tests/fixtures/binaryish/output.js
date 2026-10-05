@@ -299,7 +299,10 @@ this.type ||= (
 if (data.type || mime.lookup(this.name)) {
 }
 
-if (data.type || mime.lookup(this.name)) {
+if (
+  data.type ||
+  mime.lookup(this.name)
+) {
 }
 
 if (
@@ -350,22 +353,28 @@ const submit3 = !this.isMutating && {
 };
 
 const conditions1 = (
-  hello() &&
-  world() ||
+  (
+    hello() &&
+    world()
+  ) ||
   (whatever() && something()) ||
   somethingElse()
 );
 
 const conditions2 = (
-  hello() &&
-  world() ||
+  (
+    hello() &&
+    world()
+  ) ||
   (whatever() && something()) ||
   somethingElse()
 );
 
 const conditions3 = (
-  hello() &&
-  world() || (
+  (
+    hello() &&
+    world()
+  ) || (
     whatever() &&
     something()
   ) ||
@@ -529,6 +538,53 @@ if (
     wildcard ||
     property && ["object", "array"].includes(property.type)
   )
+) {
+  // Impl
+}
+
+if (data && !isEmptySchema(schema)) {
+  // Impl
+}
+
+if (
+  data &&
+  !isEmptySchema(schema)
+) {
+  // Impl
+}
+
+if (
+  a &&
+  (b || c)
+) {
+  // Impl
+}
+
+if (
+  a && b ||
+  c
+) {
+  // Impl
+}
+
+if (
+  !(a || b)
+) {
+  // Impl
+}
+
+if (a) {
+  if (
+    b &&
+    c
+  ) {
+    // Impl
+  }
+}
+
+while (
+  i < n &&
+  !done
 ) {
   // Impl
 }
