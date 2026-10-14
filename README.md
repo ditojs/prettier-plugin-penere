@@ -657,6 +657,8 @@ npm run playground       # Run the playground locally
   `typescript` for `.ts` files.
 - The same fixtures are formatted with `wrap: "collapse"`, which must match
   stock Prettier exactly.
+- The examples in this README are tested too, with the style they're written
+  in.
 - The source is formatted with Penere itself: `npm run format`.
 - The playground in `playground/` is deployed to GitHub Pages on every push to
   `main`.
