@@ -167,40 +167,76 @@ const list = [1, 2, 3]
 
 ### `parameterWrap`
 
-Break all parameters if the source breaks after `(`.
+Break if the source breaks after `(`, and keep the rows of parameters as
+written, like the elements of arrays. If the first row has only one parameter,
+every parameter goes on its own line.
 
 ```js
 // Input
 function request(
   url, method) {}
+function intersect(
+  p1, v1,
+  p2, v2, isInfinite) {}
+function respond(
+  status,
+  body, headers) {}
 
 // parameterWrap: "preserve"
 function request(
-  url,
-  method
+  url, method
+) {}
+function intersect(
+  p1, v1,
+  p2, v2, isInfinite
+) {}
+function respond(
+  status,
+  body,
+  headers
 ) {}
 
 // parameterWrap: "collapse"
 function request(url, method) {}
+function intersect(p1, v1, p2, v2, isInfinite) {}
+function respond(status, body, headers) {}
 ```
 
 ### `argumentWrap`
 
-Break all arguments if the source breaks after `(`.
+Break if the source breaks after `(`, and keep the rows of arguments as
+written, like the elements of arrays. If the first row has only one argument,
+every argument goes on its own line.
 
 ```js
 // Input
 test(
   foo(), bar())
+intersect(
+  p1, v1,
+  p2, v2, true)
+test(
+  foo(),
+  bar(), baz())
 
 // argumentWrap: "preserve"
 test(
+  foo(), bar()
+)
+intersect(
+  p1, v1,
+  p2, v2, true
+)
+test(
   foo(),
-  bar()
+  bar(),
+  baz()
 )
 
 // argumentWrap: "collapse"
 test(foo(), bar())
+intersect(p1, v1, p2, v2, true)
+test(foo(), bar(), baz())
 ```
 
 ### `conditionWrap`

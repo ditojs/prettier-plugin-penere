@@ -17,7 +17,7 @@ const input = 'const a = [\n  1, 2\n]\nfoo(\n  a, b\n)'
 test('`wrap` applies to all `*Wrap` options that are not set', async () => {
   assert.equal(
     await format(input),
-    'const a = [\n  1, 2,\n];\nfoo(\n  a,\n  b,\n);'
+    'const a = [\n  1, 2,\n];\nfoo(\n  a, b,\n);'
   )
   assert.equal(
     await format(input, { wrap: 'collapse' }),

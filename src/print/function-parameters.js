@@ -4,11 +4,12 @@ import {
   isDocType,
   isObjectType,
   isPreserved,
+  printRowSeparator,
   replaceDocs,
   shouldPrintTrailingComma
 } from '../utils.js'
 
-const { group, hardline, ifBreak, indent, line, softline } = doc.builders
+const { breakParent, fill, group, ifBreak, indent, softline } = doc.builders
 
 // Mirrors `getFunctionParameters()` in prettier/src/language-js/utilities.
 export function getFunctionParameters(node) {
@@ -49,16 +50,17 @@ function shouldBreakParameters(functionNode, options) {
 }
 
 /*
-Called for each function parameter. Breaking the parameter's group propagates
-to the parameter list, just like the original mod did by wrapping `print()` in
-`printFunctionParameters()`. This also makes stock Prettier bail out of the
-last-argument expansion (`ArgExpansionBailout`) where needed.
+Called for each function parameter. A `breakParent` next to the parameter
+breaks the parameter list, just like the original mod did by wrapping `print()`
+in `printFunctionParameters()`. This also makes stock Prettier bail out of the
+last-argument expansion (`ArgExpansionBailout`) where needed. Unlike a broken
+group, it lets `fill()` keep the rows of parameters.
 The parameter is always wrapped in a new array, so `printFunction()` below can
 find it in the doc by identity.
 */
 export function printFunctionParameter(parameterDoc, path, options) {
   return shouldBreakParameters(path.parent, options)
-    ? group(parameterDoc, { shouldBreak: true })
+    ? [breakParent, parameterDoc]
     : [parameterDoc]
 }
 
@@ -130,19 +132,16 @@ export function printFunction(functionDoc, path, options, parameterDocs) {
           ')'
         ]
       }
-      if (shouldBreak && isHugged) {
+      if (shouldBreak && (isHugged || isBroken)) {
         return [
           typeParametersDoc,
           '(',
           indent([
             softline,
-            ...printParameters(parameterDocs, node, parameter =>
-              util.isNextLineEmpty(
-                options.originalText,
-                options.locEnd(parameter)
+            fill(
+              printParameters(parameterDocs, node, index =>
+                printRowSeparator(parameters, index, options)
               )
-                ? [hardline, hardline]
-                : line
             )
           ]),
           (
@@ -161,15 +160,14 @@ export function printFunction(functionDoc, path, options, parameterDocs) {
   )
 }
 
+// Returns the parameters as alternating contents and separators, as `fill()`
+// expects them.
 function printParameters(parameterDocs, node, printSeparator) {
-  const parameters = getFunctionParameters(node)
   return parameterDocs.flatMap((parameterDoc, index) => {
     const isLast = index === parameterDocs.length - 1
-    return [
-      isLast && node.rest ? '...' : '',
-      parameterDoc,
-      isLast ? '' : [',', printSeparator(parameters[index])]
-    ]
+    return isLast
+      ? [[node.rest ? '...' : '', parameterDoc]]
+      : [[parameterDoc, ','], printSeparator(index)]
   })
 }
 

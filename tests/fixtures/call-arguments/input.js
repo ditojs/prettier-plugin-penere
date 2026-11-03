@@ -41,3 +41,18 @@ getResource(api.users, {
   type: 'collection'
 }) || {}
 
+
+intersect(
+  this._px, this._py, this._vx, this._vy,
+  line._px, line._py, line._vx, line._vy,
+  true, isInfinite)
+
+intersect(
+  px,
+  py, vx, vy)
+
+intersect(
+  px, py,
+
+  vx, vy
+)

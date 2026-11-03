@@ -2,11 +2,13 @@ import { doc, util } from 'prettier'
 import {
   isDocType,
   isPreserved,
+  printRowSeparator,
   replaceDocs,
   shouldPrintTrailingComma
 } from '../utils.js'
 
-const { group, hardline, ifBreak, indent, join, label, line } = doc.builders
+const { fill, group, hardline, ifBreak, indent, join, label, line } =
+  doc.builders
 
 export const isCallLikeExpression = node =>
   [
@@ -134,15 +136,14 @@ function shouldBreakArguments(call, argumentDocs, options) {
   )
 }
 
-// Mirrors `allArgsBrokenOut()` in `printCallArguments()`.
+// Mirrors `allArgsBrokenOut()` in `printCallArguments()`, but keeps the rows of
+// arguments as written.
 function printAllArgumentsBrokenOut({ call, docs }, path, options) {
   const args = call.arguments
-  const printedArguments = docs.map((argumentDoc, index) =>
+  const printedArguments = docs.flatMap((argumentDoc, index) =>
     index === args.length - 1
-      ? argumentDoc
-      : util.isNextLineEmpty(options.originalText, options.locEnd(args[index]))
-        ? [argumentDoc, ',', hardline, hardline]
-        : [argumentDoc, ',', line]
+      ? [argumentDoc]
+      : [[argumentDoc, ','], printRowSeparator(args, index, options)]
   )
   const trailingComma =
     (
@@ -153,7 +154,7 @@ function printAllArgumentsBrokenOut({ call, docs }, path, options) {
       ? ifBreak(',')
       : ''
   return group(
-    ['(', indent([line, ...printedArguments]), trailingComma, line, ')'],
+    ['(', indent([line, fill(printedArguments)]), trailingComma, line, ')'],
     { shouldBreak: true }
   )
 }
