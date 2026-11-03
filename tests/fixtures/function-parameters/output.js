@@ -60,10 +60,7 @@ request(
 );
 
 const relation = new RelationController(
-  this,
-  object,
-  relationInstance,
-  relationDefinition,
+  this, object, relationInstance, relationDefinition,
 );
 
 async function mapConcurrently1(input, callback, { concurrency = 0 }) {}
@@ -101,8 +98,7 @@ const mapConcurrently8 = (
 function test(foo, bar) {}
 
 function test(
-  foo,
-  bar,
+  foo, bar,
 ) {}
 
 function test(
@@ -112,4 +108,10 @@ function test(
 
 function test(
   foo,
+) {}
+
+function intersect(
+  p1x, p1y, v1x, v1y,
+  p2x, p2y, v2x, v2y,
+  asVector, isInfinite,
 ) {}

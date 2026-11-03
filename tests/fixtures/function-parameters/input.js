@@ -120,3 +120,9 @@ foo
 ) {
 }
 
+
+function intersect(
+  p1x, p1y, v1x, v1y,
+  p2x, p2y, v2x, v2y,
+  asVector, isInfinite) {
+}

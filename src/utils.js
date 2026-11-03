@@ -1,3 +1,7 @@
+import { doc, util } from 'prettier'
+
+const { hardline, line } = doc.builders
+
 // Whether a `*Wrap` option is set to preserve the line breaks of the source,
 // falling back to the `wrap` option.
 export const isPreserved = (options, name) => (
@@ -42,6 +46,24 @@ export const shouldPrintTrailingComma = (options, level = 'es5') => (
   (options.trailingComma === 'es5' && level === 'es5') ||
   (options.trailingComma === 'all' && (level === 'all' || level === 'es5'))
 )
+
+// Prints the separator after `nodes[index]` that keeps the rows of a broken list
+// as written: if the first row has only one node, every node goes on its own
+// line.
+export function printRowSeparator(nodes, index, options) {
+  const { originalText: text, locStart, locEnd } = options
+  const hasNewlineAfter = index =>
+    util.hasNewlineInRange(
+      text,
+      locEnd(nodes[index]),
+      locStart(nodes[index + 1])
+    )
+  return util.isNextLineEmpty(text, locEnd(nodes[index]))
+    ? [hardline, hardline]
+    : hasNewlineAfter(0) || hasNewlineAfter(index)
+      ? hardline
+      : line
+}
 
 const childKeys = ['contents', 'parts', 'breakContents', 'flatContents']
 
