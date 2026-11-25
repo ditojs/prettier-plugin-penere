@@ -12,6 +12,7 @@ const ported = new Set([
   'array',
   'assignment',
   'binaryish',
+  'binaryish-ts',
   'call-arguments',
   'extends',
   'function-parameters',

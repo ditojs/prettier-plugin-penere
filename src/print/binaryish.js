@@ -67,6 +67,17 @@ const isReturnOrThrowStatement = node => (
   node?.type === 'ThrowStatement'
 )
 
+// The TypeScript and Flow operators after an expression: `!`, `as`, `satisfies`.
+const isPostfixTypeOperation = node =>
+  [
+    'TSNonNullExpression',
+    'TSAsExpression',
+    'TSSatisfiesExpression',
+    'AsExpression',
+    'AsConstExpression',
+    'SatisfiesExpression'
+  ].includes(node?.type)
+
 const isJsxElement = node => (
   node?.type === 'JSXElement' ||
   node?.type === 'JSXFragment'
@@ -224,6 +235,8 @@ export function printBinaryishExpression(
     // `UnaryExpression` adds parentheses and indention when argument has comment
     (parent.type === 'UnaryExpression' && !hasComment(node)) ||
     (isMemberExpression(parent) && !parent.computed) ||
+    // PENERE: Also break between the parens before `!`, `as` and `satisfies`.
+    (key === 'expression' && isPostfixTypeOperation(parent)) ||
     // PENERE: Break between parens of binaryish expressions as well unless they
     // are of the same type and precedence does not dictate otherwise. But if
     // the original code has parens, preserve those.
@@ -434,7 +447,8 @@ function printBinaryishExpressions(
       'left'
     )
   } else {
-    parts.push(wrapParts([group(print('left', printArgs))]))
+    // PENERE: Push the group itself, so the chain can find the leftmost operand.
+    parts.push(...wrapParts([group(print('left', printArgs))]))
   }
 
   const shouldInline = (
