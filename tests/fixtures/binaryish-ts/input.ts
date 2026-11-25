@@ -33,3 +33,15 @@ function curveUnwrapped() {
     dddddddddddddddddddddd
   )
 }
+
+function curveSatisfies() {
+  return (
+    aaaaaaaaaaaaaaaaaaaa ||
+    bbbbbbbbbbbbbbbbbbbbbbbb
+  ) satisfies Curve
+}
+
+const curves = (
+  aaaaaaaaaaaaaaaaaaaa ||
+  bbbbbbbbbbbbbbbbbbbbbbbb
+) as const

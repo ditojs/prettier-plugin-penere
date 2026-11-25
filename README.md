@@ -373,9 +373,12 @@ const message = `${pico.gray('<--')} ${pico.bold(ctx.method)}`
 
 If the source breaks between any two operands, all operands on the same level
 break. Nested expressions that break are wrapped in parentheses, with the
-opening parenthesis on the line of the operator. Assignments, returns and arrow
-function bodies wrap broken expressions in parentheses as well. Literals, empty
-objects and arrays stay on the line of their operator.
+opening parenthesis on the line of the operator. Assignments, returns, arrow
+function bodies and array elements wrap broken expressions in parentheses as
+well, unless the expression starts with an operand in parentheses that breaks
+on its own, as in `(` … `) / h`: then the operator and the operand after it
+stay on the line of its `)`. Literals, empty objects and arrays stay on the line
+of their operator.
 
 ```js
 // Input

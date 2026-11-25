@@ -595,3 +595,60 @@ const chains = [
     bbbbbbbbbbbbbbbbbbbbbbbb ||
     cccccccccccccccccccccc
 ]
+
+const closing1 = (
+  6 * (t - 1) * t * (v1 - v2) +
+  (3 * t - 2) * t * m2
+) / h
+
+function closing2() {
+  return (
+    6 * (t - 1) * t * (v1 - v2) +
+    (3 * t - 2) * t * m2
+  ) / h
+}
+
+const closing3 = t => (
+  6 * (t - 1) * t * (v1 - v2) +
+  (3 * t - 2) * t * m2
+) / h
+
+const closing4 = (
+  6 * (t - 1) * t * (v1 - v2) +
+  (3 * t - 2) * t * m2
+) /
+  h
+
+function getValue() {
+  return [
+    ((2 * t - 3) * t * t + 1) * v1 +
+      ((t - 2) * t + 1) * t * m1 +
+      (3 - 2 * t) * t * t * v2 +
+      (t - 1) * t * t * m2,
+    (
+      6 * (t - 1) * t * (v1 - v2) +
+      ((3 * t - 4) * t + 1) * m1 +
+      (3 * t - 2) * t * m2
+    ) / h,
+    ((12 * t - 6) * (v1 - v2) + (6 * t - 4) * m1 + (6 * t - 2) * m2) /
+      (h * h),
+    t && {
+      value: v1
+    }
+  ]
+}
+
+function closingComment1() {
+  return (
+    // Reason
+    6 * (t - 1) * t * (v1 - v2) +
+    (3 * t - 2) * t * m2
+  ) / h
+}
+
+function closingComment2() {
+  return ( // Reason
+    6 * (t - 1) * t * (v1 - v2) +
+    (3 * t - 2) * t * m2
+  ) / h
+}

@@ -237,6 +237,12 @@ export function printBinaryishExpression(
     (isMemberExpression(parent) && !parent.computed) ||
     // PENERE: Also break between the parens before `!`, `as` and `satisfies`.
     (key === 'expression' && isPostfixTypeOperation(parent)) ||
+    // PENERE: Wrap broken array elements in parentheses, like assignments.
+    (
+      parent.type === 'ArrayExpression' &&
+      !shouldInlineLogicalExpression(node, parent, options) &&
+      !startsWithBrokenParentheses(node, options)
+    ) ||
     // PENERE: Break between parens of binaryish expressions as well unless they
     // are of the same type and precedence does not dictate otherwise. But if
     // the original code has parens, preserve those.
@@ -256,7 +262,11 @@ export function printBinaryishExpression(
   ) {
     // PENERE: Add parens when going multiline, unless there are parens already.
     const addParentheses = (
-      (isBinaryish(parent) || parent.type === 'ConditionalExpression') &&
+      (
+        isBinaryish(parent) ||
+        parent.type === 'ConditionalExpression' ||
+        parent.type === 'ArrayExpression'
+      ) &&
       !hasParentheses
     )
     const indented = [indent([softline, ...parts]), softline]
@@ -419,6 +429,7 @@ function printBinaryishExpressions(
 
   /** @type{Doc[]} */
   let parts = []
+  let leftContent
 
   // We treat BinaryExpression and LogicalExpression nodes the same.
 
@@ -447,8 +458,9 @@ function printBinaryishExpressions(
       'left'
     )
   } else {
+    leftContent = print('left', printArgs)
     // PENERE: Push the group itself, so the chain can find the leftmost operand.
-    parts.push(...wrapParts([group(print('left', printArgs))]))
+    parts.push(...wrapParts([group(leftContent)]))
   }
 
   const shouldInline = (
@@ -546,11 +558,16 @@ function printBinaryishExpressions(
     } else if (
       !lineBeforeOperator && (
         isBreakingParenthesizedGroup(rightContent) ||
-        isEmptyOperand(node.right)
+        isEmptyOperand(node.right) || (
+          isBreakingParenthesizedGroup(leftContent) &&
+          !shouldBreakBinaryish(node, options)
+        )
       )
     ) {
       // PENERE: Keep the opening parenthesis of broken operands, and empty
-      // operands on the line of the operator: `a && (`, `a ?? ''`.
+      // operands on the line of the operator: `a && (`, `a ?? ''`. Keep the
+      // operator on the line of the closing parenthesis of a broken left
+      // operand, unless the source breaks there: `) / h`.
       right = [operator, ' ', rightContent, rightSuffix]
     } else {
       right = [
@@ -611,13 +628,35 @@ function printBinaryishExpressions(
 // expressions, e.g. `= (` and `return (`, don't count.
 function getBreakAfterOwnParenthesis(path, options) {
   const { node, parent } = path
-  if (!isBinaryish(parent) || !isParenthesized(node, options)) {
-    return undefined
-  }
+  return isBinaryish(parent) && isParenthesized(node, options)
+    ? hasBreakAfterParenthesis(node, options)
+    : undefined
+}
+
+const hasBreakAfterParenthesis = (node, options) => {
   const text = options.originalText
   const start = options.locStart(node)
   const opener = util.skipWhitespace(text, start - 1, { backwards: true })
   return util.hasNewlineInRange(text, opener, start)
+}
+
+// Whether the expression starts with an operand in parentheses that the source
+// breaks after `(`, and doesn't break between the operands that follow, as in
+// `(\n  a +\n  b\n) / h`. Its parentheses take the place of the ones that
+// Penere wraps around broken expressions.
+export function startsWithBrokenParentheses(node, options) {
+  for (let current = node; isBinaryish(current); current = current.left) {
+    if (shouldBreakBinaryish(current, options)) {
+      return false
+    }
+    if (
+      isBinaryish(current.left) &&
+      getLeftOperandEnd(current.left, options) > options.locEnd(current.left)
+    ) {
+      return hasBreakAfterParenthesis(current.left, options)
+    }
+  }
+  return false
 }
 
 // Whether the expression is the condition of an `if`, `while` or `do … while`
@@ -637,17 +676,15 @@ const isConditionTest = (path, options) => (
 function isLevelBroken(node, options) {
   const text = options.originalText
   for (let current = node; isBinaryish(current); current = current.left) {
-    const operator = util.getNextNonSpaceNonCommentCharacterIndex(
-      text,
-      options.locEnd(current.left)
-    )
+    const leftEnd = getLeftOperandEnd(current.left, options)
+    const operator = util.getNextNonSpaceNonCommentCharacterIndex(text, leftEnd)
     const right = util.getNextNonSpaceNonCommentCharacterIndex(
       text,
       operator + current.operator.length
     )
     if (
       !isEmptyLiteral(current.right) &&
-      util.hasNewlineInRange(text, options.locEnd(current.left), right)
+      util.hasNewlineInRange(text, leftEnd, right)
     ) {
       return true
     }
@@ -702,10 +739,25 @@ export function shouldBreakBinaryish(node, options) {
     !isEmptyLiteral(node.right) &&
     util.hasNewlineInRange(
       options.originalText,
-      options.locEnd(node.left),
+      getLeftOperandEnd(node.left, options),
       options.locStart(node.right)
     )
   )
+}
+
+// The end of a left operand, after the closing parentheses around binaryish
+// ones, which Penere keeps. Breaks before the parentheses that it drops count.
+function getLeftOperandEnd(node, options) {
+  const text = options.originalText
+  let end = options.locEnd(node)
+  if (isBinaryish(node)) {
+    let next = util.getNextNonSpaceNonCommentCharacterIndex(text, end)
+    while (text[next] === ')') {
+      end = next + 1
+      next = util.getNextNonSpaceNonCommentCharacterIndex(text, end)
+    }
+  }
+  return end
 }
 
 // Empty literals, that never cause breaks before them.

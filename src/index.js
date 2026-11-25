@@ -45,6 +45,7 @@ import {
   isTemplateLiteral,
   printTemplateLiteral
 } from './print/template-literal.js'
+import { printReturnStatement } from './print/return.js'
 import { printTernary } from './print/ternary.js'
 import { printUnionType } from './print/union-type.js'
 import { isPreserved } from './utils.js'
@@ -80,6 +81,8 @@ const printers = {
   BinaryExpression: printBinaryishParentheses,
   LogicalExpression: printBinaryishParentheses,
   ConditionalExpression: printTernary,
+  ReturnStatement: printReturnStatement,
+  ThrowStatement: printReturnStatement,
   TSConditionalType: printTernary,
   ConditionalTypeAnnotation: printTernary,
   TSTupleType: printArray,

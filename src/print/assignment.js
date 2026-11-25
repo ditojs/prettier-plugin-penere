@@ -1,7 +1,10 @@
 import { doc, util } from 'prettier'
 import { hasLeadingOwnLineComment } from '../comments.js'
 import { isDocType, isPreserved, replaceDocs } from '../utils.js'
-import { shouldInlineLogicalExpression } from './binaryish.js'
+import {
+  shouldInlineLogicalExpression,
+  startsWithBrokenParentheses
+} from './binaryish.js'
 
 const {
   conditionalGroup,
@@ -76,6 +79,11 @@ export function printAssignment(assignmentDoc, path, options, nodeDocs) {
       return
     }
     const [leftDoc, operator] = printed.contents
+    // The parentheses of the first operand take the place of the ones around
+    // broken right-hand sides:
+    if (startsWithBrokenParentheses(rightNode, options)) {
+      return group([leftDoc, operator, ' ', rightDoc])
+    }
     const shouldBreakAfterOperator = (
       hasLeadingOwnLineComment(options.originalText, rightNode, options) ||
       !shouldInlineLogicalExpression(rightNode, node, options)
@@ -215,6 +223,22 @@ export function printArrowFunction(arrowDoc, path, options) {
       return
     }
     replaced = true
+    const [indented, ...rest] = [body.contents].flat().filter(Boolean)
+    if (
+      startsWithBrokenParentheses(node.body, options) &&
+      isDocType(indented, 'indent') &&
+      !rest.length
+    ) {
+      // Unwrap `group([indent([line, ...body])])`:
+      return {
+        ...printed,
+        contents: [
+          ...contents.slice(0, 2),
+          [' ', ...indented.contents.slice(1)],
+          ...contents.slice(3)
+        ]
+      }
+    }
     return {
       ...printed,
       contents: [
