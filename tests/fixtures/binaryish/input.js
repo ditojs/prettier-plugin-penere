@@ -676,3 +676,4 @@ commentedArguments(
   bbbbbbbbbbbbbbbbbbbbbbbb, // A trailing comment
   c
 )
+const requiredParentheses = a && (/* Reason */ b || c)

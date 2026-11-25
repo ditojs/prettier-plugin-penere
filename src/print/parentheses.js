@@ -32,8 +32,13 @@ function getStockParentheses(node, parent, key) {
   ) {
     return parentOperator === operator
       ? null
-      : // Mixing `??` with `&&` or `||` is a syntax error without parentheses.
-        operator === '??' || parentOperator === '??'
+      : // Mixing `??` with `&&` or `||` is a syntax error without parentheses,
+        // and `||` in `&&` changes its meaning.
+        (
+            operator === '??' ||
+            parentOperator === '??' ||
+            getPrecedence(parentOperator) > getPrecedence(operator)
+          )
         ? 'required'
         : 'clarifying'
   }
