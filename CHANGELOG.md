@@ -2,6 +2,16 @@
 
 The changes of each release of Penere.
 
+## 0.5.2 (2026-11-25)
+
+### Behaviour changes
+
+- `operatorWrap` wraps broken array elements in parentheses, like assignments, returns and arrow function bodies.
+
+### Fixes
+
+- The operator and operand after the `)` of a broken operand stay on its line unless the source breaks there, as in `(` … `) / h`, and the expression isn't wrapped in a second pair of parentheses.
+
 ## 0.5.1 (2026-11-25)
 
 ### Fixes
