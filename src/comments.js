@@ -70,7 +70,7 @@ function printTrailingComment(path, options, previousComment) {
   return { doc: [' ', printed], isBlock, hasLineSuffix: false }
 }
 
-function printLeadingComments(path, options) {
+export function printLeadingComments(path, options) {
   const printed = options[Symbol.for('printedComments')]
   const leadingComments = new Set(
     path.node?.comments?.filter(

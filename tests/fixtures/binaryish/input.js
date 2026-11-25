@@ -652,3 +652,27 @@ function closingComment2() {
     (3 * t - 2) * t * m2
   ) / h
 }
+
+const commentedElements = [
+  'a',
+  // A comment about the elements that follow:
+  'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' +
+    'cccccccccccccccccccccccccccccccccccccccccc',
+  // A comment before parentheses:
+  (
+    'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' +
+    'cccccccccccccccccccccccccccccccccccccccccc'
+  ),
+  (
+    // A comment inside parentheses:
+    'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' +
+    'cccccccccccccccccccccccccccccccccccccccccc'
+  ), // A trailing comment
+  'd'
+]
+
+commentedArguments(
+  aaaaaaaaaaaaaaaaaaaa ||
+  bbbbbbbbbbbbbbbbbbbbbbbb, // A trailing comment
+  c
+)

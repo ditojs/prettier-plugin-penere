@@ -2,7 +2,8 @@ import { doc, util } from 'prettier'
 import {
   hasLeadingOwnLineComment,
   isTypeCastComment,
-  printComments
+  printComments,
+  printLeadingComments
 } from '../comments.js'
 import { cleanDoc } from '../doc-utils.js'
 import { isPreserved } from '../utils.js'
@@ -409,15 +410,25 @@ function printBinaryishExpressions(
 
   const wrapParts = parts => {
     if (!prerun && enforceBreak && parts.length > 0) {
-      // Move the comments inside the parentheses.
-      const printed = cleanDoc(printComments(path, parts, options))
-      const printedParts = Array.isArray(printed)
-        ? printed
-        : printed.type === 'fill'
-          ? printed.parts
-          : [printed]
-      delete node.comments
-      return [group(printedParts, { shouldBreak: true })]
+      // Move the leading comments inside the parentheses, except the ones
+      // written before array elements, which stay before the parentheses
+      // around them. Trailing comments stay after the expression.
+      if (
+        path.parent.type !== 'ArrayExpression' ||
+        hasCommentsAfterParenthesis(node, options)
+      ) {
+        const printed = cleanDoc([
+          printLeadingComments(path, options),
+          ...parts
+        ])
+        parts = Array.isArray(printed)
+          ? printed
+          : printed.type === 'fill'
+            ? printed.parts
+            : [printed]
+        node.comments = node.comments?.filter(comment => !comment.leading)
+      }
+      return [group(parts, { shouldBreak: true })]
     }
     return parts
   }
@@ -638,6 +649,22 @@ const hasBreakAfterParenthesis = (node, options) => {
   const start = options.locStart(node)
   const opener = util.skipWhitespace(text, start - 1, { backwards: true })
   return util.hasNewlineInRange(text, opener, start)
+}
+
+// Whether the node's comments follow an opening parenthesis in the source.
+function hasCommentsAfterParenthesis(node, options) {
+  const [comment] = node.comments ?? []
+  const text = options.originalText
+  return (
+    !!comment && (
+      text[
+        util.skipWhitespace(text, options.locStart(comment) - 1, {
+          backwards: true
+        })
+      ] ===
+      '('
+    )
+  )
 }
 
 // Whether the expression starts with an operand in parentheses that the source
