@@ -2,6 +2,13 @@
 
 The changes of each release of Penere.
 
+## 0.5.1 (2026-11-25)
+
+### Fixes
+
+- The second operand of a broken logical or binary chain is indented like the others.
+- Chains in parentheses before `!`, `as` and `satisfies` break between the parentheses, like before `.`, instead of hugging them.
+
 ## 0.5.0 (2026-11-04)
 
 ### Behaviour changes
