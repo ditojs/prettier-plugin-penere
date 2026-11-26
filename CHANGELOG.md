@@ -2,6 +2,17 @@
 
 The changes of each release of Penere.
 
+## 0.6.1 (2026-11-26)
+
+### Behaviour changes
+
+- `operatorWrap` adds no parentheses inside expressions, which takes back the ones 0.6.0 added to nested expressions that mix other operators when they break. A nested expression that breaks lines up with the level around it, which then breaks too.
+
+### Fixes
+
+- The top level of `if`, `while` and `do … while` conditions breaks after a line break after `(`, so broken `&&` operands of a broken `||` line up there too.
+- An expression after `=` whose nested level breaks is wrapped in parentheses, also when it ends in a literal like `+ 1`.
+
 ## 0.6.0 (2026-11-26)
 
 ### Behaviour changes
