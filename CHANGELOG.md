@@ -2,6 +2,21 @@
 
 The changes of each release of Penere.
 
+## 0.6.0 (2026-11-26)
+
+### Behaviour changes
+
+- `operatorWrap` lines up broken array elements, call arguments, statements and computed keys without parentheses or indentation, which takes back the parentheses around array elements from 0.5.2.
+- Broken `&&` operands of a broken `||` line up with the others, relying on precedence, instead of getting parentheses. Nested expressions that mix other operators get parentheses when they break.
+- Parentheses whose level doesn't break hug it, also when operands inside break: `(a && (` … `) && b)`.
+- An unbroken level keeps its operators on the lines around operands that break in parentheses, anywhere in the chain: `) / h`, `2 + (` … `) + 1`.
+
+### Fixes
+
+- Formatting Penere's output again leaves it unchanged, also with comments after `(`, parentheses on the left like `(a + b) - c`, and `preserveParentheses: false`. Line breaks for width alone can still take a second run.
+- Parentheses that `||` needs inside `&&` are kept when a comment follows `(` under the `typescript` parser.
+- Trailing comments of broken expressions stay where they're written.
+
 ## 0.5.2 (2026-11-25)
 
 ### Behaviour changes
