@@ -113,36 +113,35 @@ function binaryNesting2() {
 
 function math1() {
   return (
-    (
-      // Reason for 42
-      42 *
-      84
-    ) + 2
-  );
+    // Reason for 42
+    42 *
+    84
+  ) + 2;
 }
 
 function math2() {
   return (
-    (
-      42 *
-      84
-    ) + 2
-  );
+    42 *
+    84
+  ) + 2;
 }
 
 function math3() {
   return (
-    42 *
-    84 +
+    (
+      42 *
+      84
+    ) +
     2
   );
 }
 
 function math4() {
   return (
-    2 +
-    42 *
-    84
+    2 + (
+      42 *
+      84
+    )
   );
 }
 
@@ -352,19 +351,15 @@ const submit3 = !this.isMutating && {
 };
 
 const conditions1 = (
-  (
-    hello() &&
-    world()
-  ) ||
+  hello() &&
+  world() ||
   (whatever() && something()) ||
   somethingElse()
 );
 
 const conditions2 = (
-  (
-    hello() &&
-    world()
-  ) || (
+  hello() &&
+  world() || (
     whatever() &&
     something()
   ) ||
@@ -372,10 +367,8 @@ const conditions2 = (
 );
 
 const conditions3 = (
-  (
-    hello() &&
-    world()
-  ) || (
+  hello() &&
+  world() || (
     whatever() &&
     something()
   ) ||
@@ -424,11 +417,9 @@ const data4 = this.handleDataSchema(this.schema.options, "options", {
   resolveCounter: 1,
 }) ?? "";
 
-const data5 = (
-  this.handleDataSchema(this.schema.options, "options", {
-    resolveCounter: 1,
-  }) ?? ``
-);
+const data5 = this.handleDataSchema(this.schema.options, "options", {
+  resolveCounter: 1,
+}) ?? ``;
 const cacheKey = loadCache && `${
   // Bla
   options.method || "get"
@@ -616,15 +607,13 @@ const isSameShape2 = (
 );
 
 aaaaaaaaaaaaaaaaaaaa ||
-  bbbbbbbbbbbbbbbbbbbbbbbb ||
-  cccccccccccccccccccccc;
+bbbbbbbbbbbbbbbbbbbbbbbb ||
+cccccccccccccccccccccc;
 
 const chains = [
-  (
-    aaaaaaaaaaaaaaaaaaaa ||
-    bbbbbbbbbbbbbbbbbbbbbbbb ||
-    cccccccccccccccccccccc
-  ),
+  aaaaaaaaaaaaaaaaaaaa ||
+  bbbbbbbbbbbbbbbbbbbbbbbb ||
+  cccccccccccccccccccccc,
 ];
 
 const closing1 = (
@@ -654,21 +643,17 @@ const closing4 = (
 
 function getValue() {
   return [
-    (
-      ((2 * t - 3) * t * t + 1) * v1 +
-      ((t - 2) * t + 1) * t * m1 +
-      (3 - 2 * t) * t * t * v2 +
-      (t - 1) * t * t * m2
-    ),
+    ((2 * t - 3) * t * t + 1) * v1 +
+    ((t - 2) * t + 1) * t * m1 +
+    (3 - 2 * t) * t * t * v2 +
+    (t - 1) * t * t * m2,
     (
       6 * (t - 1) * t * (v1 - v2) +
       ((3 * t - 4) * t + 1) * m1 +
       (3 * t - 2) * t * m2
     ) / h,
-    (
-      ((12 * t - 6) * (v1 - v2) + (6 * t - 4) * m1 + (6 * t - 2) * m2) /
-      (h * h)
-    ),
+    ((12 * t - 6) * (v1 - v2) + (6 * t - 4) * m1 + (6 * t - 2) * m2) /
+    (h * h),
     t && {
       value: v1,
     },
@@ -694,20 +679,14 @@ function closingComment2() {
 const commentedElements = [
   "a",
   // A comment about the elements that follow:
-  (
-    "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" +
-    "cccccccccccccccccccccccccccccccccccccccccc"
-  ),
+  "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" +
+  "cccccccccccccccccccccccccccccccccccccccccc",
   // A comment before parentheses:
-  (
-    "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" +
-    "cccccccccccccccccccccccccccccccccccccccccc"
-  ),
-  (
-    // A comment inside parentheses:
-    "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" +
-    "cccccccccccccccccccccccccccccccccccccccccc"
-  ), // A trailing comment
+  "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" +
+  "cccccccccccccccccccccccccccccccccccccccccc",
+  // A comment inside parentheses:
+  "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" +
+  "cccccccccccccccccccccccccccccccccccccccccc", // A trailing comment
   "d",
 ];
 
@@ -716,4 +695,32 @@ commentedArguments(
   bbbbbbbbbbbbbbbbbbbbbbbb, // A trailing comment
   c,
 );
-const requiredParentheses = a && /* Reason */ (b || c);
+
+const requiredParentheses = a && (/* Reason */ b || c);
+
+const midChain = 2 + (
+  42 *
+  84
+) + 1;
+
+const keptLevel = (
+  aaaa ||
+  bbbb &&
+  cccc ||
+  dddd
+);
+
+const leftLevel = (
+  aaaa &&
+  bbbb
+) || cccc;
+
+function closingComment3() {
+  return (
+    // A comment before written parentheses
+    (
+      aaaa +
+      bbbb
+    ) / h
+  );
+}

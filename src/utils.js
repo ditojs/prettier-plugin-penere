@@ -26,6 +26,25 @@ export const getOption = (options, name) => (
 
 export const isDocType = (doc, type) => doc?.type === type
 
+// The index of the code character before `index`, skipping whitespace and the
+// comments of the file, or -1.
+export function getPreviousCodeIndex(text, index, options) {
+  const comments = options[Symbol.for('comments')] ?? []
+  const skip = index => {
+    const previous = util.skipWhitespace(text, index - 1, { backwards: true })
+    return previous === false ? -1 : previous
+  }
+  const findCommentEndingAt = index =>
+    comments.find(comment => options.locEnd(comment) - 1 === index)
+  let previous = skip(index)
+  let comment = findCommentEndingAt(previous)
+  while (comment) {
+    previous = skip(options.locStart(comment))
+    comment = findCommentEndingAt(previous)
+  }
+  return previous
+}
+
 export const hasComment = (node, filter) => !!node?.comments?.some(filter)
 
 export const isLineComment = (comment, options) =>

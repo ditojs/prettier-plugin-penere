@@ -676,4 +676,24 @@ commentedArguments(
   bbbbbbbbbbbbbbbbbbbbbbbb, // A trailing comment
   c
 )
+
 const requiredParentheses = a && (/* Reason */ b || c)
+
+const midChain = 2 + 42 *
+  84 + 1
+
+const keptLevel = aaaa || bbbb &&
+  cccc || dddd
+
+const leftLevel = aaaa &&
+  bbbb || cccc
+
+function closingComment3() {
+  return (
+    // A comment before written parentheses
+    (
+      aaaa +
+      bbbb
+    ) / h
+  )
+}

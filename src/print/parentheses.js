@@ -5,7 +5,7 @@ import {
   isMixedMultiplication,
   shouldFlatten
 } from '../precedence.js'
-import { getOption, isDocType } from '../utils.js'
+import { getOption, getPreviousCodeIndex, isDocType } from '../utils.js'
 
 const isBinaryish = node => (
   node?.type === 'BinaryExpression' ||
@@ -93,10 +93,11 @@ export function isParenthesized(node, options) {
     return true
   }
   const text = options.originalText
-  const before = util.skipWhitespace(text, options.locStart(node) - 1, {
-    backwards: true
-  })
-  const after = util.skipWhitespace(text, options.locEnd(node))
+  const before = getPreviousCodeIndex(text, options.locStart(node), options)
+  const after = util.getNextNonSpaceNonCommentCharacterIndex(
+    text,
+    options.locEnd(node)
+  )
   return text[before] === '(' && text[after] === ')'
 }
 
@@ -128,15 +129,22 @@ export function shouldParenthesize(path, options, isStockWrapped) {
     // Not a case we handle, or not what we expect: leave it to stock Prettier.
     return isStockWrapped
   }
-  return (
-    stock === 'required' ||
-    stock === 'stock' ||
-    (stock === 'clarifying' && getOption(options, 'clarifyMixedOperators')) || (
-      getOption(options, 'preserveParentheses') &&
-      isParenthesized(node, options)
-    )
-  )
+  return shouldKeepParentheses(stock, node, options)
 }
+
+// Whether an operand of a binaryish expression prints in parentheses, by the
+// same rules as `shouldParenthesize()`, without asking stock Prettier.
+export const hasOperandParentheses = (node, parent, key, options) =>
+  shouldKeepParentheses(getParentheses(node, parent, key), node, options)
+
+const shouldKeepParentheses = (stock, node, options) => (
+  stock === 'required' ||
+  stock === 'stock' ||
+  (stock === 'clarifying' && getOption(options, 'clarifyMixedOperators')) || (
+    getOption(options, 'preserveParentheses') &&
+    isParenthesized(node, options)
+  )
+)
 
 export function printBinaryishParentheses(binaryishDoc, path, options) {
   const isStockWrapped = isWrapped(binaryishDoc)

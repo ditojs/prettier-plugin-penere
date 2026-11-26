@@ -371,14 +371,31 @@ const message = `${pico.gray('<--')} ${pico.bold(ctx.method)}`
 
 ### `operatorWrap`
 
-If the source breaks between any two operands, all operands on the same level
-break. Nested expressions that break are wrapped in parentheses, with the
-opening parenthesis on the line of the operator. Assignments, returns, arrow
-function bodies and array elements wrap broken expressions in parentheses as
-well, unless the expression starts with an operand in parentheses that breaks
-on its own, as in `(` … `) / h`: then the operator and the operand after it
-stay on the line of its `)`. Literals, empty objects and arrays stay on the line
-of their operator.
+A chain of operators of one precedence is a level. If the source breaks
+between any two of its operands, the level breaks: every operand starts a line,
+with the operator at the end of the line before. Line breaks right inside
+parentheses belong to the operand in them, not to the level around it. A level
+that doesn't break stays on one line if it fits.
+
+- After `return`, `throw`, `=` and `=>`, and in conditions, a broken
+  expression is wrapped in parentheses. One that only breaks inside the
+  parentheses of its first operand isn't: `x = (` … `) / h`.
+- A level that doesn't break keeps its operators on the lines around the
+  parentheses of operands that break, as in `a && (` and `) / h`, however long
+  these lines get.
+- Parentheses break after `(` only when the level inside them breaks, and hug
+  it otherwise. For the ones you write, the line break after `(` decides, like
+  the `{` of objects: to bring the level back onto one line, remove that one.
+- Penere adds parentheses only to a nested expression that breaks: when the
+  level around it stays on one line, or when it mixes operators other than
+  `&&` inside `||`, which relies on precedence. Parentheses you write are kept,
+  see `preserveParentheses`.
+- Expressions that start their own line, such as array elements, call
+  arguments and statements, line up their operands without indentation or
+  parentheses: the operator at the end of a line shows that the expression
+  continues.
+
+Literals, empty objects and arrays stay on the line of their operator.
 
 ```js
 // Input
@@ -413,13 +430,9 @@ function isEmpty(arg) {
 const isValid = value => value != null && value !== ''
 ```
 
-Operands of mixed `&&` and `||` follow the same rule: they're only wrapped in
-parentheses when they break between their own operands. Operands that stay on
-one line, like `!ctor && !isModule(arg)` below, or only break inside a nested
-group, like `ctor && (`, don't get any. Parentheses you write are kept, see
-`preserveParentheses`. Once an operand has parentheses of its own, the line break
-after its `(` decides whether it breaks, like the `{` of objects: to bring it
-back onto one line, remove that one.
+For example, a broken `&&` operand of a broken `||` lines up with the other
+operands, like `!this.providesData` below, while a broken `*` in a `+` gets
+parentheses:
 
 ```js
 // operatorWrap: "preserve"
@@ -442,6 +455,33 @@ const isSameShape = (
     isArray(after)
   )
 )
+
+const isEditable = (
+  !this.providesData &&
+  !this.linksToView ||
+  form && (
+    form.isTransient ||
+    form.isCreating
+  )
+)
+
+throw new RelationError(
+  'Unable to create through join for ' +
+  `composite keys from '${this}' to '${toRef}'`
+)
+
+const offset = (
+  part.offset + (
+    part.length *
+    getCurveLength(part.v, 0, t) /
+    part.curveLength
+  )
+)
+
+const d1 = (
+  6 * (t - 1) * t * (v1 - v2) +
+  (3 * t - 2) * t * m2
+) / h
 ```
 
 ### `importExportWrap`
@@ -633,7 +673,8 @@ const pairs = [
 Prettier adds parentheses to mixed `&&` / `||`, mixed `*` / `/`, `%` within
 `+` / `-`, and `??` within conditionals. Penere only keeps the ones you wrote.
 Parentheses required by precedence or syntax, e.g. around `??` mixed with
-`||`, are always kept.
+`||`, are always kept. With `true`, the added parentheses also wrap broken
+expressions.
 
 ```js
 // clarifyMixedOperators: false

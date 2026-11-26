@@ -2,8 +2,8 @@ import { doc, util } from 'prettier'
 import { hasLeadingOwnLineComment } from '../comments.js'
 import { isDocType, isPreserved, replaceDocs } from '../utils.js'
 import {
-  shouldInlineLogicalExpression,
-  startsWithBrokenParentheses
+  getStartingParentheses,
+  shouldInlineLogicalExpression
 } from './binaryish.js'
 
 const {
@@ -35,6 +35,12 @@ const rightPropertyNames = {
 export const isAssignmentLike = node => (
   !!rightPropertyNames[node?.type] &&
   !(node.type === 'Property' && (node.method || node.kind !== 'init'))
+)
+
+// Whether the path is the assigned value of an assignment-like node.
+export const isAssignedValue = path => (
+  isAssignmentLike(path.parent) &&
+  path.key === rightPropertyNames[path.parent.type]
 )
 
 const isBinaryish = node => (
@@ -81,7 +87,7 @@ export function printAssignment(assignmentDoc, path, options, nodeDocs) {
     const [leftDoc, operator] = printed.contents
     // The parentheses of the first operand take the place of the ones around
     // broken right-hand sides:
-    if (startsWithBrokenParentheses(rightNode, options)) {
+    if (getStartingParentheses(rightNode, options)) {
       return group([leftDoc, operator, ' ', rightDoc])
     }
     const shouldBreakAfterOperator = (
@@ -225,7 +231,7 @@ export function printArrowFunction(arrowDoc, path, options) {
     replaced = true
     const [indented, ...rest] = [body.contents].flat().filter(Boolean)
     if (
-      startsWithBrokenParentheses(node.body, options) &&
+      getStartingParentheses(node.body, options) &&
       isDocType(indented, 'indent') &&
       !rest.length
     ) {

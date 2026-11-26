@@ -64,6 +64,17 @@ describe('penere output', () => {
   }
 })
 
+// Formatting Penere's own output again has to leave it unchanged.
+describe('penere output is stable', () => {
+  for (const { name, output, parsers } of fixtures) {
+    for (const parser of parsers) {
+      test(`${name} (${parser})`, { skip: !ported.has(name) }, async () => {
+        assert.equal(await format(output, { parser }), output)
+      })
+    }
+  }
+})
+
 describe('stock options match stock prettier', () => {
   for (const { name, input, parsers } of fixtures) {
     for (const parser of parsers) {
