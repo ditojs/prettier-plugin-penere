@@ -386,10 +386,10 @@ that doesn't break stays on one line if it fits.
 - Parentheses break after `(` only when the level inside them breaks, and hug
   it otherwise. For the ones you write, the line break after `(` decides, like
   the `{` of objects: to bring the level back onto one line, remove that one.
-- Penere adds parentheses only to a nested expression that breaks: when the
-  level around it stays on one line, or when it mixes operators other than
-  `&&` inside `||`, which relies on precedence. Parentheses you write are kept,
-  see `preserveParentheses`.
+- Inside expressions, Penere adds no parentheses: there are only the ones you
+  write, see `preserveParentheses`, and the ones precedence requires. A nested
+  expression that breaks lines up with the level around it, which then breaks
+  too, relying on precedence.
 - Expressions that start their own line, such as array elements, call
   arguments and statements, line up their operands without indentation or
   parentheses: the operator at the end of a line shows that the expression
@@ -431,8 +431,7 @@ const isValid = value => value != null && value !== ''
 ```
 
 For example, a broken `&&` operand of a broken `||` lines up with the other
-operands, like `!this.providesData` below, while a broken `*` in a `+` gets
-parentheses:
+operands, like `!this.providesData` below, and so does a broken `*` in a `<=`:
 
 ```js
 // operatorWrap: "preserve"
@@ -470,12 +469,10 @@ throw new RelationError(
   `composite keys from '${this}' to '${toRef}'`
 )
 
-const offset = (
-  part.offset + (
-    part.length *
-    getCurveLength(part.v, 0, t) /
-    part.curveLength
-  )
+const isCollinear = (
+  Math.abs(x1 * y2 - y1 * x2) <=
+  Math.sqrt((x1 * x1 + y1 * y1) * (x2 * x2 + y2 * y2)) *
+  TRIGONOMETRIC_EPSILON
 )
 
 const d1 = (
@@ -673,8 +670,8 @@ const pairs = [
 Prettier adds parentheses to mixed `&&` / `||`, mixed `*` / `/`, `%` within
 `+` / `-`, and `??` within conditionals. Penere only keeps the ones you wrote.
 Parentheses required by precedence or syntax, e.g. around `??` mixed with
-`||`, are always kept. With `true`, the added parentheses also wrap broken
-expressions.
+`||`, are always kept. With `true`, Penere adds Prettier's parentheses, on one
+line and when broken alike.
 
 ```js
 // clarifyMixedOperators: false

@@ -157,7 +157,11 @@ export function printBinaryishExpression(
   // PENERE: In conditions, the line break after `(` decides whether the top
   // level breaks, see `conditionWrap`, like the one after `{` for objects.
   const breakLevels = args?.breakLevels ?? {
-    ...(isConditionTest(path, options) ? { ignoredLevel: 0 } : {}),
+    ...(
+      isConditionTest(path, options)
+        ? { ignoredLevel: 0, 0: isParenthesizedLevelBroken(node, options) }
+        : {}
+    ),
     hugs: {}
   }
   const level = args?.level ?? 0
@@ -178,11 +182,14 @@ export function printBinaryishExpression(
   // breaks between its operands don't count.
   const breaksAfterParenthesis = getBreakAfterOwnParenthesis(path, options)
 
-  // PENERE: Expressions wrapped when they break only hug a starting operand.
+  // PENERE: Expressions wrapped when they break only hug a starting operand,
+  // and not in conditions, whose `(` stays.
   const isUnhugged = (
     isRoot &&
-    isWrappedWhenBroken(path, options) &&
-    !getStartingParentheses(node, options)
+    isWrappedWhenBroken(path, options) && (
+      isConditionTest(path, options) ||
+      !getStartingParentheses(node, options)
+    )
   )
   const ownLevel = isFlattened ? level : level + 1
   let levelBreaks
@@ -240,23 +247,14 @@ export function printBinaryishExpression(
     (isMemberExpression(parent) && !parent.computed) ||
     // PENERE: Also break between the parens before `!`, `as` and `satisfies`.
     (key === 'expression' && isPostfixTypeOperation(parent)) ||
-    (parent.type === 'ConditionalExpression' && key === 'test') || (
-      // PENERE: Break between the parens of nested expressions that have them,
-      // or get them because they break on their own: `a || (`.
-      isBinaryish(parent) && (
-        hasParentheses || (
-          isLevelBroken(node, options) && (
-            !args?.breakLevels[args.level] ||
-            // `&&` in a broken `||` relies on precedence:
-            !(node.operator === '&&' && parent.operator === '||')
-          )
-        )
-      )
-    )
+    (parent.type === 'ConditionalExpression' && key === 'test') ||
+    // PENERE: Break between the parens of nested expressions that have them.
+    // Penere adds none inside expressions, the nested levels line up.
+    (isBinaryish(parent) && hasParentheses)
   ) {
-    // PENERE: Add parens when going multiline, unless there are parens already.
+    // PENERE: Add parens to tests of conditionals when going multiline.
     const addParentheses = (
-      (isBinaryish(parent) || parent.type === 'ConditionalExpression') &&
+      parent.type === 'ConditionalExpression' &&
       !hasParentheses
     )
     // PENERE: Keep comments after `(` inside the parentheses.
@@ -413,37 +411,28 @@ function printBinaryishExpressions(
   // PENERE: Break all operands on this level if the source breaks any of them.
   breakLevels[level] ||= (
     level !== breakLevels.ignoredLevel &&
-    isBinaryish(node) &&
-    isPairBroken(node, options)
-  )
-  // PENERE: An unbroken level hugs operands that break inside. Where it can't,
-  // it breaks, unless the second of only two breaks: `a || (` looks the same.
-  const isOnlyPair = (
-    !(
-      isBinaryish(path.parent) &&
-      path.key === 'left' &&
-      shouldFlatten(path.parent.operator, node.operator)
-    ) &&
-    !(
-      isBinaryish(node.left) && shouldFlatten(node.operator, node.left.operator)
+    isBinaryish(node) && (
+      isPairBroken(node, options) ||
+      isNestedLevelBroken(node, 'right', options) || (
+        !shouldFlatten(node.operator, node.left.operator) &&
+        isNestedLevelBroken(node, 'left', options)
+      )
     )
   )
-  const isLeftBreakingInside = (
-    isBinaryish(node) &&
-    !shouldFlatten(node.operator, node.left.operator) &&
-    breaksInside(node, 'left', options)
-  )
-  const isRightBreakingInside = (
-    isBinaryish(node) &&
-    breaksInside(node, 'right', options)
+  // PENERE: An unbroken level hugs operands that break inside, and breaks where
+  // it can't hug, see `isUnhugged`.
+  const hasOperandBreakingInside = (
+    isBinaryish(node) && (
+      breaksInside(node, 'right', options) || (
+        !shouldFlatten(node.operator, node.left.operator) &&
+        breaksInside(node, 'left', options)
+      )
+    )
   )
   if (level === breakLevels.unhuggedLevel) {
-    breakLevels[level] ||= (
-      isLeftBreakingInside ||
-      (isRightBreakingInside && !isOnlyPair)
-    )
+    breakLevels[level] ||= hasOperandBreakingInside
   } else {
-    breakLevels.hugs[level] ||= isLeftBreakingInside || isRightBreakingInside
+    breakLevels.hugs[level] ||= hasOperandBreakingInside
   }
   const printArgs = { breakLevels, level, prerun }
 
@@ -665,7 +654,7 @@ function printBinaryishExpressions(
 function getBreakAfterOwnParenthesis(path, options) {
   const { node, parent, key } = path
   return isBinaryish(parent) && hasWrittenParentheses(parent, key, options)
-    ? hasBreakAfterParenthesis(node, options)
+    ? isParenthesizedLevelBroken(node, options)
     : undefined
 }
 
@@ -690,14 +679,13 @@ function isBrokenOperand(node, key, options) {
   return (
     isBinaryish(operand) &&
     // Left operands of the same precedence are part of the level:
-    !(key === 'left' && shouldFlatten(node.operator, operand.operator)) && (
-      hasWrittenParentheses(node, key, options)
-        ? hasBreakAfterParenthesis(operand, options)
-        : (
-            hasOperandParentheses(operand, node, key, options) ||
-            !shouldFlatten(node.operator, operand.operator)
-          ) &&
-          isLevelBroken(operand, options)
+    !(key === 'left' && shouldFlatten(node.operator, operand.operator)) &&
+    hasOperandParentheses(operand, node, key, options) &&
+    // The ones `clarifyMixedOperators` adds break with their level:
+    (
+      isParenthesized(operand, options)
+        ? isParenthesizedLevelBroken(operand, options)
+        : isLevelBroken(operand, options)
     )
   )
 }
@@ -716,7 +704,7 @@ function breaksInside(node, key, options) {
       breaks = hasOperandBreakingInside()
     } else {
       const isOperandLevelBroken = hasWrittenParentheses(node, key, options)
-        ? hasBreakAfterParenthesis(operand, options)
+        ? isParenthesizedLevelBroken(operand, options)
         : isLevelBroken(operand, options)
       breaks = (
         isBrokenOperand(node, key, options) ||
@@ -828,7 +816,10 @@ const isConditionTest = (path, options) => (
 // level, i.e. the expression and its flattened left operands.
 function isLevelBroken(node, options) {
   for (let current = node; isBinaryish(current); current = current.left) {
-    if (isPairBroken(current, options)) {
+    if (
+      isPairBroken(current, options) ||
+      isNestedLevelBroken(current, 'right', options)
+    ) {
       return true
     }
     // Left operands of the same precedence are part of the level, also in
@@ -837,11 +828,40 @@ function isLevelBroken(node, options) {
       !isBinaryish(current.left) ||
       !shouldFlatten(current.operator, current.left.operator)
     ) {
-      return false
+      return isNestedLevelBroken(current, 'left', options)
     }
   }
   return false
 }
+
+// Whether the level of an operand in written parentheses breaks: after the
+// `(`, see rule 3, or in a nested level without parentheses, which shares its
+// lines with it.
+function isParenthesizedLevelBroken(node, options) {
+  if (hasBreakAfterParenthesis(node, options)) {
+    return true
+  }
+  for (let current = node; isBinaryish(current); current = current.left) {
+    if (isNestedLevelBroken(current, 'right', options)) {
+      return true
+    }
+    if (
+      !isBinaryish(current.left) ||
+      !shouldFlatten(current.operator, current.left.operator)
+    ) {
+      return isNestedLevelBroken(current, 'left', options)
+    }
+  }
+  return false
+}
+
+// Whether the operand at `key` is a nested level without parentheses that
+// breaks, which shares its lines with the level around it.
+const isNestedLevelBroken = (node, key, options) => (
+  isBinaryish(node[key]) &&
+  !hasOperandParentheses(node[key], node, key, options) &&
+  isLevelBroken(node[key], options)
+)
 
 // Whether the doc is a group that breaks between parentheses, as printed above:
 // `group([ifBreak("("), indent([softline, ...]), softline, ifBreak(")")])`, or
@@ -956,7 +976,7 @@ export function shouldInlineLogicalExpression(node, parent, options) {
   }
 
   // PENERE: Don't inline what breaks in the source.
-  if (shouldBreakBinaryish(node, options)) {
+  if (isLevelBroken(node, options)) {
     return false
   }
 

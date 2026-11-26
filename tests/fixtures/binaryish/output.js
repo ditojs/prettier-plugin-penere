@@ -65,10 +65,9 @@ function isMultipleOf10(value) {
 
 function binaryTemplate() {
   return (
-    this.isTransient && (
-      "<b>Note</b>: the parent still needs to be saved " +
-      "in order to persist this change."
-    )
+    this.isTransient &&
+    "<b>Note</b>: the parent still needs to be saved " +
+    "in order to persist this change."
   );
 }
 
@@ -115,42 +114,40 @@ function math1() {
   return (
     // Reason for 42
     42 *
-    84
-  ) + 2;
+    84 +
+    2
+  );
 }
 
 function math2() {
   return (
     42 *
-    84
-  ) + 2;
+    84 +
+    2
+  );
 }
 
 function math3() {
   return (
-    (
-      42 *
-      84
-    ) +
+    42 *
+    84 +
     2
   );
 }
 
 function math4() {
   return (
-    2 + (
-      42 *
-      84
-    )
+    2 +
+    42 *
+    84
   );
 }
 
 function math5() {
   return (
-    2 + (
-      42 *
-      84
-    )
+    2 +
+    42 *
+    84
   );
 }
 
@@ -698,10 +695,12 @@ commentedArguments(
 
 const requiredParentheses = a && (/* Reason */ b || c);
 
-const midChain = 2 + (
+const midChain = (
+  2 +
   42 *
-  84
-) + 1;
+  84 +
+  1
+);
 
 const keptLevel = (
   aaaa ||
@@ -712,8 +711,9 @@ const keptLevel = (
 
 const leftLevel = (
   aaaa &&
-  bbbb
-) || cccc;
+  bbbb ||
+  cccc
+);
 
 function closingComment3() {
   return (
